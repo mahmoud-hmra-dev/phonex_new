@@ -1,0 +1,731 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+
+    'theme' => [
+        'name'  => 'Phonix - Premium Electronics Store',
+        'title' => 'Phonix - Rise With Technology',
+    ],
+
+    'general' => [
+        'home'             => 'Home',
+        'shop'             => 'Shop',
+        'about'            => 'About',
+        'contact'          => 'Contact',
+        'faq'              => 'FAQ',
+        'search'           => 'Search',
+        'close'            => 'Close',
+        'open'             => 'Open',
+        'loading'          => 'Loading...',
+        'more'             => 'More',
+        'less'             => 'Less',
+        'view_all'         => 'View All',
+        'back'             => 'Back',
+        'next'             => 'Next',
+        'previous'         => 'Previous',
+        'submit'           => 'Submit',
+        'cancel'           => 'Cancel',
+        'save'             => 'Save',
+        'delete'           => 'Delete',
+        'edit'             => 'Edit',
+        'confirm'          => 'Confirm',
+        'yes'              => 'Yes',
+        'no'               => 'No',
+        'or'               => 'Or',
+        'and'              => 'And',
+        'currency'         => 'Currency',
+        'language'         => 'Language',
+        'skip_to_content'  => 'Skip to main content',
+        'breadcrumb'       => 'Breadcrumb',
+        'menu'             => 'Menu',
+    ],
+
+    'header' => [
+        'nav' => [
+            'home'          => 'Home',
+            'categories'    => 'Categories',
+            'deals'         => 'Deals',
+            'brands'        => 'Brands',
+            'new_arrivals'  => 'New Arrivals',
+            'bestsellers'   => 'Bestsellers',
+            'support'       => 'Support',
+            'track_order'   => 'Track Order',
+        ],
+
+        'search' => [
+            'placeholder'      => 'Search phones, laptops, accessories...',
+            'button'           => 'Search',
+            'no_results'       => 'No results found',
+            'trending'         => 'Trending Searches',
+            'recent_searches'  => 'Recent Searches',
+        ],
+
+        'cart' => [
+            'title'       => 'Shopping Cart',
+            'empty'       => 'Your cart is empty',
+            'items_count' => ':count item(s)',
+            'view_cart'   => 'View Cart',
+            'checkout'    => 'Checkout',
+            'subtotal'    => 'Subtotal',
+        ],
+
+        'account' => [
+            'login'      => 'Login',
+            'register'   => 'Register',
+            'my_account' => 'My Account',
+            'orders'     => 'My Orders',
+            'wishlist'   => 'Wishlist',
+            'addresses'  => 'Addresses',
+            'profile'    => 'Profile',
+            'logout'     => 'Logout',
+            'welcome'    => 'Welcome, :name',
+        ],
+
+        'dark_mode' => [
+            'toggle' => 'Toggle Theme',
+            'light'  => 'Light Mode',
+            'dark'   => 'Dark Mode',
+        ],
+
+        'language' => [
+            'switch'  => 'Switch Language',
+            'arabic'  => 'Arabic',
+            'english' => 'English',
+        ],
+    ],
+
+    'hero' => [
+        'title'         => 'Rise With Technology',
+        'subtitle'      => 'Discover the latest phones, laptops, and smart devices at unbeatable prices with fast delivery across the region.',
+        'cta_primary'   => 'Shop Now',
+        'cta_secondary' => 'View Deals',
+    ],
+
+    'categories' => [
+        'title'             => 'Shop by Category',
+        'phones'            => 'Phones',
+        'laptops'           => 'Laptops',
+        'tablets'           => 'Tablets',
+        'smartwatches'      => 'Smartwatches',
+        'audio'             => 'Audio',
+        'accessories'       => 'Accessories',
+        'headphones'        => 'Headphones',
+        'chargers'          => 'Chargers',
+        'cases'             => 'Cases',
+        'screen_protectors' => 'Screen Protectors',
+        'cables'            => 'Cables',
+        'power_banks'       => 'Power Banks',
+        'view_all'          => 'View All Categories',
+    ],
+
+    'product' => [
+        'add_to_cart'          => 'Add to Cart',
+        'buy_now'              => 'Buy Now',
+        'add_to_wishlist'      => 'Add to Wishlist',
+        'remove_from_wishlist' => 'Remove from Wishlist',
+        'compare'              => 'Compare',
+        'in_stock'             => 'In Stock',
+        'out_of_stock'         => 'Out of Stock',
+        'low_stock'            => 'Low Stock - Only :count left',
+        'pre_order'            => 'Pre-Order',
+        'price'                => 'Price',
+        'original_price'       => 'Original Price',
+        'sale_price'           => 'Sale Price',
+        'discount'             => 'Discount',
+        'save_percent'         => 'Save :percent%',
+        'free_shipping'        => 'Free Shipping',
+        'sku'                  => 'SKU',
+        'brand'                => 'Brand',
+        'model'                => 'Model',
+        'color'                => 'Color',
+        'storage'              => 'Storage',
+        'ram'                  => 'RAM',
+        'processor'            => 'Processor',
+        'screen_size'          => 'Screen Size',
+        'battery'              => 'Battery',
+        'description'          => 'Description',
+        'specifications'       => 'Specifications',
+        'reviews'              => 'Reviews',
+        'related_products'     => 'Related Products',
+        'similar_products'     => 'Similar Products',
+        'rating'               => 'Rating',
+        'reviews_count'        => ':count Reviews',
+        'write_review'         => 'Write a Review',
+        'no_reviews'           => 'No reviews yet. Be the first to review this product!',
+        'share'                => 'Share',
+        'share_facebook'       => 'Share on Facebook',
+        'share_twitter'        => 'Share on Twitter',
+        'share_whatsapp'       => 'Share on WhatsApp',
+        'quantity'             => 'Quantity',
+        'min_quantity'         => 'Minimum quantity is :qty',
+        'max_quantity'         => 'Maximum quantity is :qty',
+        'new'                  => 'New',
+        'sale'                 => 'Sale',
+        'hot'                  => 'Hot',
+        'featured'             => 'Featured',
+        'bestseller'           => 'Bestseller',
+        'limited_edition'      => 'Limited Edition',
+        'select_variant'       => 'Select Variant',
+        'select_color'         => 'Select Color',
+        'select_storage'       => 'Select Storage',
+        'select_size'          => 'Select Size',
+    ],
+
+    'listing' => [
+        'title'         => 'Products',
+        'results_count' => ':count Results',
+        'showing'       => 'Showing',
+        'of'            => 'of',
+
+        'filters' => [
+            'title'        => 'Filters',
+            'clear_all'    => 'Clear All',
+            'apply'        => 'Apply Filters',
+            'price_range'  => 'Price Range',
+            'brand'        => 'Brand',
+            'color'        => 'Color',
+            'rating'       => 'Rating',
+            'availability' => 'Availability',
+            'category'     => 'Category',
+            'ram'          => 'RAM',
+            'storage'      => 'Storage',
+            'screen_size'  => 'Screen Size',
+            'processor'    => 'Processor',
+        ],
+
+        'sort' => [
+            'title'      => 'Sort By',
+            'newest'     => 'Newest First',
+            'price_low'  => 'Price: Low to High',
+            'price_high' => 'Price: High to Low',
+            'popular'    => 'Most Popular',
+            'rating'     => 'Highest Rated',
+            'name_asc'   => 'Name: A to Z',
+            'name_desc'  => 'Name: Z to A',
+            'discount'   => 'Biggest Discount',
+        ],
+
+        'view' => [
+            'grid' => 'Grid View',
+            'list' => 'List View',
+        ],
+
+        'no_products'           => 'No products found.',
+        'try_different_filters' => 'Try adjusting your filters or search for something else.',
+
+        'pagination' => [
+            'previous'   => 'Previous',
+            'next'       => 'Next',
+            'page'       => 'Page :page',
+            'showing_of' => 'Showing :from to :to of :total results',
+        ],
+    ],
+
+    'cart' => [
+        'title'             => 'Shopping Cart',
+        'empty'             => 'Your Cart is Empty',
+        'empty_message'     => 'Looks like you haven\'t added anything to your cart yet. Start shopping and discover amazing electronics!',
+        'continue_shopping' => 'Continue Shopping',
+        'clear_cart'        => 'Clear Cart',
+        'item'              => 'Item',
+        'items'             => 'Items',
+        'remove'            => 'Remove',
+        'update'            => 'Update',
+        'quantity'          => 'Quantity',
+        'subtotal'          => 'Subtotal',
+        'shipping'          => 'Shipping',
+        'tax'               => 'Tax',
+        'discount'          => 'Discount',
+        'total'             => 'Total',
+        'grand_total'       => 'Grand Total',
+
+        'coupon' => [
+            'title'           => 'Coupon Code',
+            'placeholder'     => 'Enter coupon code',
+            'apply'           => 'Apply',
+            'remove'          => 'Remove',
+            'invalid'         => 'Invalid coupon code.',
+            'expired'         => 'This coupon has expired.',
+            'applied_success' => 'Coupon applied successfully!',
+        ],
+
+        'summary'             => 'Order Summary',
+        'proceed_to_checkout' => 'Proceed to Checkout',
+        'free_shipping_message' => 'Free shipping on orders over :amount',
+    ],
+
+    'checkout' => [
+        'title' => 'Checkout',
+        'steps' => 'Checkout Steps',
+
+        'address' => [
+            'title'           => 'Shipping & Billing Address',
+            'billing'         => 'Billing Address',
+            'shipping'        => 'Shipping Address',
+            'same_as_billing' => 'Same as billing address',
+            'add_new'         => 'Add New Address',
+            'select_address'  => 'Select an Address',
+        ],
+
+        'form' => [
+            'first_name' => 'First Name',
+            'last_name'  => 'Last Name',
+            'email'      => 'Email Address',
+            'phone'      => 'Phone Number',
+            'company'    => 'Company Name',
+            'address1'   => 'Street Address',
+            'address2'   => 'Apartment, Suite, etc. (Optional)',
+            'city'       => 'City',
+            'state'      => 'State / Region',
+            'postcode'   => 'Postal Code',
+            'country'    => 'Country',
+        ],
+
+        'shipping' => [
+            'title'              => 'Shipping Method',
+            'method'             => 'Shipping Method',
+            'free'               => 'Free Shipping',
+            'express'            => 'Express Shipping',
+            'standard'           => 'Standard Shipping',
+            'estimated_delivery' => 'Estimated Delivery: :days business days',
+        ],
+
+        'payment' => [
+            'title'            => 'Payment Method',
+            'method'           => 'Payment Method',
+            'credit_card'      => 'Credit / Debit Card',
+            'card_number'      => 'Card Number',
+            'expiry'           => 'Expiry Date',
+            'cvv'              => 'CVV',
+            'name_on_card'     => 'Name on Card',
+            'bank_transfer'    => 'Bank Transfer',
+            'cash_on_delivery' => 'Cash on Delivery',
+        ],
+
+        'review' => [
+            'title'       => 'Review Your Order',
+            'place_order' => 'Place Order',
+            'edit_cart'   => 'Edit Cart',
+            'terms_agree' => 'I agree to the Terms & Conditions and Privacy Policy',
+        ],
+
+        'success' => [
+            'title'             => 'Order Placed Successfully!',
+            'message'           => 'Thank you for your order! You will receive a confirmation email shortly with your order details.',
+            'order_number'      => 'Order Number',
+            'track_order'       => 'Track Your Order',
+            'continue_shopping' => 'Continue Shopping',
+        ],
+    ],
+
+    'account' => [
+        'title'    => 'My Account',
+        'sidebar'  => [
+            'dashboard' => 'Dashboard',
+            'orders'    => 'Orders',
+            'addresses' => 'Addresses',
+            'wishlist'  => 'Wishlist',
+            'reviews'   => 'Reviews',
+            'profile'   => 'Profile',
+            'logout'    => 'Logout',
+        ],
+
+        'dashboard' => [
+            'title'            => 'Dashboard',
+            'welcome'          => 'Welcome back, :name!',
+            'recent_orders'    => 'Recent Orders',
+            'account_info'     => 'Account Information',
+            'address_book'     => 'Address Book',
+            'total_orders'     => 'Total Orders',
+            'wishlist_items'   => 'Wishlist Items',
+            'pending_orders'   => 'Pending Orders',
+            'completed_orders' => 'Completed Orders',
+            'edit_profile'     => 'Edit Profile',
+            'manage_addresses' => 'Manage Addresses',
+            'default_address'  => 'Default Address',
+            'no_default_address' => 'No default address set.',
+            'view_all_orders'  => 'View All Orders',
+        ],
+
+        'orders' => [
+            'title'          => 'My Orders',
+            'order_id'       => 'Order #:id',
+            'date'           => 'Date',
+            'status'         => 'Status',
+            'total'          => 'Total',
+            'items'          => 'Items',
+            'items_count'    => ':count item(s)',
+            'view'           => 'View Details',
+            'track'          => 'Track Order',
+            'cancel'         => 'Cancel Order',
+            'return'         => 'Return Order',
+            'reorder'        => 'Reorder',
+            'no_orders'      => 'You have no orders yet.',
+            'start_shopping' => 'Start Shopping',
+            'filter_all'     => 'All',
+            'order_placed'   => 'Order Placed',
+            'order_details'  => 'Order Details',
+            'order_summary'  => 'Order Summary',
+            'subtotal'       => 'Subtotal',
+            'shipping'       => 'Shipping',
+            'tax'            => 'Tax',
+            'discount'       => 'Discount',
+            'grand_total'    => 'Grand Total',
+            'shipping_address' => 'Shipping Address',
+            'payment_method'   => 'Payment Method',
+            'order_timeline'   => 'Order Timeline',
+            'quantity'         => 'Qty',
+            'variant'          => 'Variant',
+        ],
+
+        'order_status' => [
+            'pending'    => 'Pending',
+            'processing' => 'Processing',
+            'shipped'    => 'Shipped',
+            'delivered'  => 'Delivered',
+            'cancelled'  => 'Cancelled',
+            'returned'   => 'Returned',
+            'refunded'   => 'Refunded',
+        ],
+
+        'addresses' => [
+            'title'           => 'My Addresses',
+            'add'             => 'Add New Address',
+            'edit'            => 'Edit Address',
+            'delete'          => 'Delete Address',
+            'default'         => 'Default',
+            'set_default'     => 'Set as Default',
+            'no_addresses'    => 'You have no saved addresses.',
+            'first_name'      => 'First Name',
+            'last_name'       => 'Last Name',
+            'phone'           => 'Phone Number',
+            'address_line_1'  => 'Street Address',
+            'address_line_2'  => 'Apartment, Suite (Optional)',
+            'city'            => 'City',
+            'state'           => 'State / Region',
+            'postcode'        => 'Postal Code',
+            'country'         => 'Country',
+            'save_address'    => 'Save Address',
+        ],
+
+        'profile' => [
+            'title'            => 'My Profile',
+            'settings'         => 'Profile Settings',
+            'personal_info'    => 'Personal Information',
+            'name'             => 'Full Name',
+            'email'            => 'Email Address',
+            'phone'            => 'Phone Number',
+            'password'         => 'Password',
+            'change_password'  => 'Change Password',
+            'current_password' => 'Current Password',
+            'new_password'     => 'New Password',
+            'confirm_password' => 'Confirm Password',
+            'update'           => 'Update Profile',
+            'save_password'    => 'Update Password',
+            'gender'           => 'Gender',
+            'gender_male'      => 'Male',
+            'gender_female'    => 'Female',
+            'gender_other'     => 'Other',
+            'dob'              => 'Date of Birth',
+        ],
+
+        'wishlist' => [
+            'title'             => 'My Wishlist',
+            'empty'             => 'Your wishlist is empty.',
+            'empty_message'     => 'You haven\'t added any items to your wishlist yet.',
+            'explore_products'  => 'Explore Products',
+            'move_to_cart'      => 'Move to Cart',
+            'remove'            => 'Remove',
+            'no_wishlist_items' => 'You haven\'t added any items to your wishlist yet.',
+        ],
+
+        'reviews' => [
+            'title'      => 'My Reviews',
+            'my_reviews' => 'My Reviews',
+            'no_reviews' => 'You haven\'t written any reviews yet.',
+        ],
+    ],
+
+    'auth' => [
+        'login' => [
+            'title'         => 'Login',
+            'email'         => 'Email Address',
+            'password'      => 'Password',
+            'remember'      => 'Remember Me',
+            'forgot'        => 'Forgot Password?',
+            'submit'        => 'Login',
+            'no_account'    => 'Don\'t have an account?',
+            'register_link' => 'Register Now',
+        ],
+
+        'register' => [
+            'title'            => 'Create Account',
+            'name'             => 'Full Name',
+            'email'            => 'Email Address',
+            'password'         => 'Password',
+            'confirm_password' => 'Confirm Password',
+            'submit'           => 'Create Account',
+            'has_account'      => 'Already have an account?',
+            'login_link'       => 'Login Here',
+            'terms_agree'      => 'I agree to the Terms & Conditions and Privacy Policy',
+        ],
+
+        'forgot' => [
+            'title'         => 'Forgot Password',
+            'description'   => 'Enter your email address and we\'ll send you a link to reset your password.',
+            'email'         => 'Email Address',
+            'submit'        => 'Send Reset Link',
+            'back_to_login' => 'Back to Login',
+            'reset_sent'    => 'Password reset link has been sent to your email.',
+            'check_email'   => 'Check Your Email',
+            'check_email_message' => 'We\'ve sent a password reset link to your email address. Please check your inbox.',
+        ],
+
+        'social' => [
+            'or'              => 'Or continue with',
+            'google'          => 'Continue with Google',
+            'apple'           => 'Continue with Apple',
+        ],
+
+        'reset' => [
+            'title'            => 'Reset Password',
+            'password'         => 'New Password',
+            'confirm_password' => 'Confirm New Password',
+            'submit'           => 'Reset Password',
+        ],
+    ],
+
+    'footer' => [
+        'about' => [
+            'title'       => 'About Phonix',
+            'description' => 'Phonix is your trusted destination for premium electronics and smart devices. We bring you the latest technology from top global brands with exceptional service and fast delivery.',
+        ],
+
+        'links' => [
+            'about_us'         => 'About Us',
+            'contact_us'       => 'Contact Us',
+            'privacy_policy'   => 'Privacy Policy',
+            'terms_conditions' => 'Terms & Conditions',
+            'return_policy'    => 'Return Policy',
+            'shipping_info'    => 'Shipping Information',
+            'faq'              => 'FAQ',
+            'careers'          => 'Careers',
+            'blog'             => 'Blog',
+        ],
+
+        'newsletter' => [
+            'title'       => 'Stay Updated',
+            'subtitle'    => 'Subscribe to our newsletter for the latest deals and new arrivals.',
+            'placeholder' => 'Enter your email address',
+            'subscribe'   => 'Subscribe',
+            'success'     => 'Thank you for subscribing!',
+        ],
+
+        'social' => [
+            'follow_us' => 'Follow Us',
+            'facebook'  => 'Facebook',
+            'twitter'   => 'Twitter',
+            'instagram' => 'Instagram',
+            'youtube'   => 'YouTube',
+            'tiktok'    => 'TikTok',
+        ],
+
+        'payment' => [
+            'secure_payment' => 'Secure Payment',
+            'methods'        => 'Payment Methods',
+        ],
+
+        'copyright' => '© 2024 Phonix. All rights reserved.',
+
+        'contact' => [
+            'phone'         => 'Phone',
+            'email'         => 'Email',
+            'address'       => 'Address',
+            'working_hours' => 'Working Hours',
+        ],
+    ],
+
+    'deals' => [
+        'flash_deal'    => 'Flash Deal',
+        'deal_of_day'   => 'Deal of the Day',
+        'limited_offer' => 'Limited Time Offer',
+        'ends_in'       => 'Ends In',
+
+        'timer' => [
+            'days'    => 'Days',
+            'hours'   => 'Hours',
+            'minutes' => 'Minutes',
+            'seconds' => 'Seconds',
+        ],
+
+        'hurry'          => 'Hurry Up!',
+        'items_left'     => 'Only :count items left!',
+        'save_up_to'     => 'Save up to :percent%',
+        'shop_deal'      => 'Shop This Deal',
+        'view_all_deals' => 'View All Deals',
+    ],
+
+    'messages' => [
+        'success' => [
+            'added_to_cart'        => 'Product added to cart successfully!',
+            'removed_from_cart'    => 'Product removed from cart.',
+            'added_to_wishlist'    => 'Product added to wishlist!',
+            'removed_from_wishlist' => 'Product removed from wishlist.',
+            'order_placed'         => 'Your order has been placed successfully!',
+            'review_submitted'     => 'Your review has been submitted. Thank you!',
+            'profile_updated'      => 'Profile updated successfully!',
+            'address_saved'        => 'Address saved successfully!',
+            'address_deleted'      => 'Address deleted successfully.',
+            'password_changed'     => 'Password changed successfully!',
+            'coupon_applied'       => 'Coupon applied successfully!',
+            'subscribed'           => 'You have been subscribed to our newsletter!',
+        ],
+
+        'error' => [
+            'general'           => 'Something went wrong. Please try again.',
+            'not_found'         => 'The requested resource was not found.',
+            'out_of_stock'      => 'This product is currently out of stock.',
+            'invalid_quantity'  => 'Invalid quantity selected.',
+            'invalid_coupon'    => 'The coupon code is invalid or has expired.',
+            'login_required'    => 'Please login to continue.',
+            'server_error'      => 'Server error. Please try again later.',
+            'validation_failed' => 'Please check the form and correct any errors.',
+        ],
+
+        'confirm' => [
+            'delete_address' => 'Are you sure you want to delete this address?',
+            'remove_item'    => 'Are you sure you want to remove this item?',
+            'cancel_order'   => 'Are you sure you want to cancel this order?',
+            'clear_cart'     => 'Are you sure you want to clear your entire cart?',
+            'logout'         => 'Are you sure you want to logout?',
+        ],
+    ],
+
+    'featured' => [
+        'title'        => 'Featured Products',
+        'bestsellers'  => 'Bestsellers',
+        'new_arrivals' => 'New Arrivals',
+        'trending'     => 'Trending',
+    ],
+
+    'brands' => [
+        'title'          => 'Shop by Brand',
+        'all_brands'     => 'All Brands',
+        'popular_brands' => 'Popular Brands',
+        'view_brand'     => 'View Brand',
+    ],
+
+    'deal_of_day' => [
+        'title'       => 'Deal of the Day',
+        'subtitle'    => 'Don\'t miss out on today\'s exclusive offer!',
+        'items_sold'  => ':percent% Sold',
+        'hurry'       => 'Hurry, limited stock!',
+    ],
+
+    'newsletter' => [
+        'title'       => 'Stay Updated',
+        'subtitle'    => 'Subscribe to get exclusive deals, new arrivals, and tech news delivered to your inbox.',
+        'placeholder' => 'Enter your email address',
+        'subscribe'   => 'Subscribe',
+        'privacy'     => 'We respect your privacy. Unsubscribe at any time.',
+    ],
+
+    'stats' => [
+        'products_count'    => 'Products',
+        'happy_customers'   => 'Happy Customers',
+        'brands_count'      => 'Brands',
+        'years_experience'  => 'Years of Experience',
+    ],
+
+    'testimonials' => [
+        'title' => 'What Our Customers Say',
+
+        'items' => [
+            [
+                'name' => 'Ahmed Al-Rashid',
+                'role' => 'Verified Buyer',
+                'text' => 'Excellent service and fast delivery! I ordered the latest iPhone and it arrived the next day. The packaging was perfect and the price was the best I found online.',
+            ],
+            [
+                'name' => 'Sarah Johnson',
+                'role' => 'Verified Buyer',
+                'text' => 'Phonix has become my go-to store for all electronics. Their customer support is outstanding and they always have the newest products in stock.',
+            ],
+            [
+                'name' => 'Mohammed Al-Faisal',
+                'role' => 'Verified Buyer',
+                'text' => 'I bought a Samsung Galaxy and a pair of wireless earbuds. Both arrived in perfect condition. Great prices and genuine products. Highly recommended!',
+            ],
+        ],
+    ],
+
+    'features' => [
+        'free_shipping' => [
+            'title'       => 'Free Shipping',
+            'description' => 'Free shipping on all orders over a minimum purchase amount. Fast and reliable delivery to your doorstep.',
+        ],
+
+        'secure_payment' => [
+            'title'       => 'Secure Payment',
+            'description' => 'Your payment information is always protected with bank-level encryption and secure checkout.',
+        ],
+
+        'money_back' => [
+            'title'       => 'Money Back Guarantee',
+            'description' => 'Not satisfied? Return your product within 14 days for a full refund. No questions asked.',
+        ],
+
+        'support_24_7' => [
+            'title'       => '24/7 Support',
+            'description' => 'Our dedicated support team is available around the clock to assist you with any questions or concerns.',
+        ],
+
+        'fast_delivery' => [
+            'title'       => 'Fast Delivery',
+            'description' => 'Express delivery options available. Get your order delivered within 24-48 hours in major cities.',
+        ],
+
+        'warranty' => [
+            'title'       => 'Official Warranty',
+            'description' => 'All products come with official manufacturer warranty. Your purchase is guaranteed and protected.',
+        ],
+    ],
+
+    'misc' => [
+        '404' => [
+            'title'           => 'Page Not Found',
+            'heading'         => '404',
+            'tagline'         => 'The page you\'re looking for has taken flight',
+            'message'         => 'Sorry, the page you are looking for does not exist or has been moved.',
+            'back_home'       => 'Back to Home',
+            'search_placeholder' => 'Search for what you need...',
+            'search_button'   => 'Search',
+            'suggested_links' => 'Suggested Links',
+        ],
+
+        'coming_soon' => [
+            'title'   => 'Coming Soon',
+            'message' => 'We are working on something exciting! Stay tuned for updates.',
+        ],
+
+        'maintenance' => [
+            'title'   => 'Under Maintenance',
+            'message' => 'We are currently performing scheduled maintenance. We will be back shortly.',
+        ],
+
+        'compare' => [
+            'title'       => 'Compare Products',
+            'add'         => 'Add to Compare',
+            'remove'      => 'Remove from Compare',
+            'empty'       => 'No products to compare.',
+            'no_products' => 'Add at least two products to start comparing.',
+        ],
+
+        'recently_viewed' => [
+            'title' => 'Recently Viewed',
+        ],
+    ],
+
+];

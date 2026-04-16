@@ -104,6 +104,7 @@
             "Webkul\\Stripe\\": "packages/Webkul/Stripe/src",
             "Webkul\\Tax\\": "packages/Webkul/Tax/src",
             "Webkul\\Theme\\": "packages/Webkul/Theme/src",
+            "Webkul\\Phonix\\": "packages/Webkul/Phonix/src/",
             "Webkul\\User\\": "packages/Webkul/User/src"
         }
     },

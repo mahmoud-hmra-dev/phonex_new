@@ -10,7 +10,7 @@ return [
     |
     */
 
-    'shop-default' => 'default',
+    'shop-default' => 'phonix',
 
     'shop' => [
         'default' => [
@@ -21,6 +21,18 @@ return [
             'vite' => [
                 'hot_file' => 'shop-default-vite.hot',
                 'build_directory' => 'themes/shop/default/build',
+                'package_assets_directory' => 'src/Resources/assets',
+            ],
+        ],
+
+        'phonix' => [
+            'name' => 'Phonix',
+            'assets_path' => 'public/themes/shop/phonix',
+            'views_path' => 'packages/Webkul/Phonix/src/Resources/views',
+
+            'vite' => [
+                'hot_file' => 'shop-phonix-vite.hot',
+                'build_directory' => 'themes/shop/phonix/build',
                 'package_assets_directory' => 'src/Resources/assets',
             ],
         ],

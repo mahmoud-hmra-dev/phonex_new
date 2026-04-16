@@ -1,0 +1,452 @@
+/* =================================================================
+   Phonix Design System — Premium Electronics Store Theme
+   ================================================================= */
+
+/* Google Fonts: Cairo (Arabic), Inter (UI body), Poppins (Headings) */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =================================================================
+   Base Layer — CSS Custom Properties & Resets
+   ================================================================= */
+@layer base {
+    :root {
+        /* Primary Teal */
+        --phoenix-50: #E6F7F9;
+        --phoenix-100: #C2ECF0;
+        --phoenix-200: #94DCE4;
+        --phoenix-300: #7DD8E0;
+        --phoenix-400: #4FC3D0;
+        --phoenix-500: #1A8A96;
+        --phoenix-600: #127883;
+        --phoenix-700: #0F5F6B;
+        --phoenix-800: #0A4852;
+        --phoenix-900: #063138;
+        --phoenix-950: #031D20;
+
+        /* Accents */
+        --coral: #FF6B6B;
+        --gold: #FFD93D;
+
+        /* Semantic colors — Light mode */
+        --color-bg: #FFFFFF;
+        --color-surface: #F5F8F8;
+        --color-card: #FFFFFF;
+        --color-border: #D4DCDD;
+        --color-border-light: #E8EDED;
+        --color-text: #1E2829;
+        --color-text-secondary: #6B8184;
+        --color-text-muted: #8A9C9F;
+        --color-primary: var(--phoenix-500);
+        --color-primary-hover: var(--phoenix-600);
+        --color-primary-light: var(--phoenix-50);
+        --color-accent-coral: var(--coral);
+        --color-accent-gold: var(--gold);
+
+        /* Shadows */
+        --shadow-color: rgba(26, 138, 150, 0.1);
+
+        /* Selection */
+        --color-selection-bg: var(--phoenix-200);
+        --color-selection-text: var(--phoenix-900);
+
+        /* Focus ring */
+        --color-focus-ring: var(--phoenix-400);
+    }
+
+    .dark {
+        --color-bg: #0A1A1D;
+        --color-surface: #0F2528;
+        --color-card: #132E32;
+        --color-border: #1A3D42;
+        --color-border-light: #1A3D42;
+        --color-text: #E8EDED;
+        --color-text-secondary: #B3C0C2;
+        --color-text-muted: #8A9C9F;
+        --color-primary: var(--phoenix-400);
+        --color-primary-hover: var(--phoenix-300);
+        --color-primary-light: rgba(26, 138, 150, 0.15);
+
+        --shadow-color: rgba(0, 0, 0, 0.4);
+
+        --color-selection-bg: var(--phoenix-700);
+        --color-selection-text: var(--phoenix-100);
+
+        --color-focus-ring: var(--phoenix-500);
+    }
+
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Base body */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    /* Arabic typography */
+    html[lang="ar"] body,
+    html[dir="rtl"] body {
+        font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
+    }
+
+    html[lang="ar"] h1,
+    html[lang="ar"] h2,
+    html[lang="ar"] h3,
+    html[lang="ar"] h4,
+    html[lang="ar"] h5,
+    html[lang="ar"] h6,
+    html[dir="rtl"] h1,
+    html[dir="rtl"] h2,
+    html[dir="rtl"] h3,
+    html[dir="rtl"] h4,
+    html[dir="rtl"] h5,
+    html[dir="rtl"] h6 {
+        font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
+        font-weight: 700;
+    }
+
+    /* LTR headings use Poppins */
+    html:not([lang="ar"]):not([dir="rtl"]) h1,
+    html:not([lang="ar"]):not([dir="rtl"]) h2,
+    html:not([lang="ar"]):not([dir="rtl"]) h3,
+    html:not([lang="ar"]):not([dir="rtl"]) h4,
+    html:not([lang="ar"]):not([dir="rtl"]) h5,
+    html:not([lang="ar"]):not([dir="rtl"]) h6 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+
+    /* Selection color */
+    ::selection {
+        background-color: var(--color-selection-bg);
+        color: var(--color-selection-text);
+    }
+
+    ::-moz-selection {
+        background-color: var(--color-selection-bg);
+        color: var(--color-selection-text);
+    }
+
+    /* Focus visible */
+    *:focus-visible {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
+    }
+
+    /* Remove spinners from number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+}
+
+/* =================================================================
+   Components Layer
+   ================================================================= */
+@layer components {
+    /* ----- Buttons ----- */
+
+    .btn-phoenix {
+        @apply inline-flex items-center justify-center gap-[8px]
+               px-[24px] py-[12px]
+               text-sm font-semibold text-white
+               rounded-md
+               transition-all duration-200 ease-phoenix
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phoenix-400 focus-visible:ring-offset-2
+               disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+        background: linear-gradient(135deg, var(--phoenix-500), var(--phoenix-600));
+        box-shadow: 0 2px 8px rgba(26, 138, 150, 0.25);
+    }
+    .btn-phoenix:hover:not(:disabled) {
+        background: linear-gradient(135deg, var(--phoenix-600), var(--phoenix-700));
+        box-shadow: 0 4px 16px rgba(26, 138, 150, 0.35);
+        transform: translateY(-1px);
+    }
+    .btn-phoenix:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(26, 138, 150, 0.2);
+    }
+    .dark .btn-phoenix {
+        background: linear-gradient(135deg, var(--phoenix-400), var(--phoenix-500));
+    }
+    .dark .btn-phoenix:hover:not(:disabled) {
+        background: linear-gradient(135deg, var(--phoenix-300), var(--phoenix-400));
+        box-shadow: 0 4px 20px rgba(79, 195, 208, 0.3);
+    }
+
+    .btn-phoenix-outline {
+        @apply inline-flex items-center justify-center gap-[8px]
+               px-[24px] py-[12px]
+               text-sm font-semibold
+               rounded-md border-2
+               transition-all duration-200 ease-phoenix
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phoenix-400 focus-visible:ring-offset-2
+               disabled:opacity-50 disabled:cursor-not-allowed;
+        color: var(--phoenix-600);
+        border-color: var(--phoenix-500);
+        background: transparent;
+    }
+    .btn-phoenix-outline:hover:not(:disabled) {
+        background: var(--phoenix-500);
+        color: #FFFFFF;
+        border-color: var(--phoenix-500);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(26, 138, 150, 0.25);
+    }
+    .btn-phoenix-outline:active:not(:disabled) {
+        transform: translateY(0);
+    }
+    .dark .btn-phoenix-outline {
+        color: var(--phoenix-300);
+        border-color: var(--phoenix-400);
+    }
+    .dark .btn-phoenix-outline:hover:not(:disabled) {
+        background: var(--phoenix-400);
+        border-color: var(--phoenix-400);
+        color: var(--phoenix-950);
+    }
+
+    .btn-phoenix-ghost {
+        @apply inline-flex items-center justify-center gap-[8px]
+               px-[24px] py-[12px]
+               text-sm font-semibold
+               rounded-md
+               transition-all duration-200 ease-phoenix
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-phoenix-400 focus-visible:ring-offset-2
+               disabled:opacity-50 disabled:cursor-not-allowed;
+        color: var(--phoenix-600);
+        background: transparent;
+    }
+    .btn-phoenix-ghost:hover:not(:disabled) {
+        background: var(--phoenix-50);
+        color: var(--phoenix-700);
+    }
+    .btn-phoenix-ghost:active:not(:disabled) {
+        background: var(--phoenix-100);
+    }
+    .dark .btn-phoenix-ghost {
+        color: var(--phoenix-300);
+    }
+    .dark .btn-phoenix-ghost:hover:not(:disabled) {
+        background: rgba(79, 195, 208, 0.1);
+        color: var(--phoenix-200);
+    }
+
+    /* ----- Cards ----- */
+
+    .card-glass {
+        @apply rounded-lg border;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 16px rgba(26, 138, 150, 0.06);
+    }
+    .dark .card-glass {
+        background: rgba(19, 46, 50, 0.6);
+        border-color: rgba(26, 61, 66, 0.5);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-phoenix {
+        @apply rounded-lg border transition-all duration-200 ease-phoenix;
+        background: var(--color-card);
+        border-color: var(--color-border-light);
+        box-shadow: 0 2px 8px rgba(26, 138, 150, 0.08), 0 1px 2px rgba(26, 138, 150, 0.06);
+    }
+    .card-phoenix:hover {
+        box-shadow: 0 8px 24px rgba(26, 138, 150, 0.12), 0 2px 8px rgba(26, 138, 150, 0.08);
+        transform: translateY(-2px);
+    }
+    .dark .card-phoenix {
+        background: var(--color-card);
+        border-color: var(--color-border);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .dark .card-phoenix:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border-color: var(--phoenix-700);
+    }
+
+    /* ----- Badges ----- */
+
+    .badge-sale {
+        @apply inline-flex items-center px-[10px] py-[4px]
+               text-xs font-bold uppercase tracking-wider
+               rounded-sm;
+        background: var(--coral);
+        color: #FFFFFF;
+    }
+
+    .badge-new {
+        @apply inline-flex items-center px-[10px] py-[4px]
+               text-xs font-bold uppercase tracking-wider
+               rounded-sm;
+        background: var(--phoenix-500);
+        color: #FFFFFF;
+    }
+    .dark .badge-new {
+        background: var(--phoenix-400);
+        color: var(--phoenix-950);
+    }
+
+    .badge-hot {
+        @apply inline-flex items-center px-[10px] py-[4px]
+               text-xs font-bold uppercase tracking-wider
+               rounded-sm;
+        background: var(--gold);
+        color: #1E2829;
+    }
+
+    /* ----- Form Input ----- */
+
+    .input-phoenix {
+        @apply w-full px-[16px] py-[12px]
+               text-sm
+               rounded-md border
+               transition-all duration-200 ease-phoenix
+               placeholder:text-slate-400;
+        background: var(--color-bg);
+        color: var(--color-text);
+        border-color: var(--color-border);
+    }
+    .input-phoenix:hover {
+        border-color: var(--phoenix-400);
+    }
+    .input-phoenix:focus {
+        outline: none;
+        border-color: var(--phoenix-500);
+        box-shadow: 0 0 0 3px rgba(26, 138, 150, 0.15);
+    }
+    .dark .input-phoenix {
+        background: var(--color-surface);
+        border-color: var(--color-border);
+    }
+    .dark .input-phoenix:hover {
+        border-color: var(--phoenix-500);
+    }
+    .dark .input-phoenix:focus {
+        border-color: var(--phoenix-400);
+        box-shadow: 0 0 0 3px rgba(79, 195, 208, 0.15);
+    }
+
+    /* ----- Gradients ----- */
+
+    .gradient-phoenix {
+        background: linear-gradient(135deg, var(--phoenix-500), var(--phoenix-400));
+    }
+
+    .gradient-hero {
+        background: linear-gradient(180deg, var(--phoenix-950) 0%, var(--phoenix-900) 50%, #0A1A1D 100%);
+    }
+
+    .text-gradient-phoenix {
+        background: linear-gradient(135deg, var(--phoenix-400), var(--phoenix-600));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* ----- Glow Effect ----- */
+
+    .glow-teal {
+        box-shadow: 0 0 20px rgba(26, 138, 150, 0.35), 0 0 60px rgba(26, 138, 150, 0.15);
+    }
+    .dark .glow-teal {
+        box-shadow: 0 0 20px rgba(79, 195, 208, 0.25), 0 0 60px rgba(79, 195, 208, 0.1);
+    }
+
+    /* ----- Glassmorphism Navbar ----- */
+
+    .glass-nav {
+        @apply fixed top-0 inset-x-0 z-50 border-b;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-nav {
+        background: rgba(10, 26, 29, 0.85);
+        border-color: rgba(26, 61, 66, 0.4);
+    }
+
+    /* ----- Section Spacing ----- */
+
+    .section-padding {
+        @apply py-[48px] px-[16px];
+    }
+    @media (min-width: 768px) {
+        .section-padding {
+            @apply py-[64px] px-[24px];
+        }
+    }
+    @media (min-width: 1024px) {
+        .section-padding {
+            @apply py-[80px] px-[32px];
+        }
+    }
+}
+
+/* =================================================================
+   Utilities Layer
+   ================================================================= */
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+
+    /* Custom thin scrollbar */
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: var(--phoenix-400) transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: var(--phoenix-400);
+        border-radius: 3px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background-color: var(--phoenix-500);
+    }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: var(--phoenix-700);
+    }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background-color: var(--phoenix-600);
+    }
+}
+
+/* =================================================================
+   Reduced Motion — disable all custom animations
+   ================================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

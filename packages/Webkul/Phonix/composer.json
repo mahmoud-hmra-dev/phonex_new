@@ -1,0 +1,19 @@
+{
+    "name": "webkul/phonix",
+    "description": "Phonix - Premium Electronics Store Theme for Bagisto",
+    "type": "bagisto-package",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Phonix\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Phonix\\Providers\\PhonixServiceProvider"
+            ]
+        }
+    }
+}
