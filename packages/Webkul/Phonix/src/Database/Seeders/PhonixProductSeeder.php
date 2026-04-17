@@ -289,28 +289,36 @@ class PhonixProductSeeder extends Seeder
     protected function downloadProductImage(int $productId, string $productName): void
     {
         try {
-            $text = urlencode($productName);
-            $imageUrl = "https://fakeimg.pl/500x500/1a8a96/ffffff/?text={$text}&font=noto";
+            $localPlaceholder = __DIR__ . '/../../Resources/assets/images/large-product-placeholder.webp';
+            $imageContent = null;
 
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 10,
-                    'user_agent' => 'Mozilla/5.0',
-                ],
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                ],
-            ]);
+            if (file_exists($localPlaceholder)) {
+                $imageContent = file_get_contents($localPlaceholder);
+            }
 
-            $imageContent = @file_get_contents($imageUrl, false, $context);
+            if ($imageContent === null || $imageContent === false) {
+                $text = urlencode($productName);
+                $imageUrl = "https://fakeimg.pl/500x500/1a8a96/ffffff/?text={$text}&font=noto";
 
-            if ($imageContent === false) {
-                // Fallback: create a simple placeholder
-                $imageContent = $this->generatePlaceholderImage($productName);
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 10,
+                        'user_agent' => 'Mozilla/5.0',
+                    ],
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                ]);
 
-                if ($imageContent === null) {
-                    return;
+                $imageContent = @file_get_contents($imageUrl, false, $context);
+
+                if ($imageContent === false) {
+                    $imageContent = $this->generatePlaceholderImage($productName);
+
+                    if ($imageContent === null) {
+                        return;
+                    }
                 }
             }
 
