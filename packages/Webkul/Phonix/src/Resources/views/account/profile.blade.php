@@ -1,12 +1,6 @@
 {{-- Profile Settings --}}
 @php
-    $user = [
-        'name'   => 'Ahmed Mohamed',
-        'email'  => 'ahmed@example.com',
-        'phone'  => '+966 50 123 4567',
-        'gender' => 'male',
-        'dob'    => '1990-05-15',
-    ];
+    $customer = auth('customer')->user();
 @endphp
 
 <x-phonix::account.layout
@@ -16,19 +10,9 @@
     <div
         class="space-y-[24px]"
         x-data="{
-            profileSaved: false,
-            passwordSaved: false,
             showCurrentPassword: false,
             showNewPassword: false,
             showConfirmPassword: false,
-            saveProfile() {
-                this.profileSaved = true;
-                setTimeout(() => this.profileSaved = false, 3000);
-            },
-            savePassword() {
-                this.passwordSaved = true;
-                setTimeout(() => this.passwordSaved = false, 3000);
-            },
         }"
     >
         {{-- Page Title --}}
@@ -43,29 +27,56 @@
             </h2>
 
             {{-- Success Message --}}
-            <div
-                x-show="profileSaved"
-                x-transition
-                x-cloak
-                class="mb-[16px] p-[12px] rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300"
-                role="alert"
-            >
-                @lang('phonix::app.messages.success.profile_updated')
-            </div>
+            @if(session()->has('success'))
+                <div
+                    class="mb-[16px] p-[12px] rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300"
+                    role="alert"
+                >
+                    @lang('phonix::app.messages.success.profile_updated')
+                </div>
+            @endif
 
-            <form @submit.prevent="saveProfile()" class="space-y-[16px]">
-                <div>
-                    <label for="profile-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
-                        @lang('phonix::app.account.profile.name') <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="profile-name"
-                        value="{{ $user['name'] }}"
-                        class="input-phoenix"
-                        required
-                        aria-required="true"
-                    />
+            @if($errors->has('email'))
+                <div
+                    class="mb-[16px] p-[12px] rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300"
+                    role="alert"
+                >
+                    {{ $errors->first('email') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('phonix.account.profile.update') }}" class="space-y-[16px]">
+                @csrf
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
+                    <div>
+                        <label for="profile-first-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
+                            @lang('phonix::app.account.profile.first_name') <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="profile-first-name"
+                            name="first_name"
+                            value="{{ old('first_name', $customer->first_name) }}"
+                            class="input-phoenix"
+                            required
+                            aria-required="true"
+                        />
+                    </div>
+                    <div>
+                        <label for="profile-last-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
+                            @lang('phonix::app.account.profile.last_name') <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="profile-last-name"
+                            name="last_name"
+                            value="{{ old('last_name', $customer->last_name) }}"
+                            class="input-phoenix"
+                            required
+                            aria-required="true"
+                        />
+                    </div>
                 </div>
 
                 <div>
@@ -75,7 +86,8 @@
                     <input
                         type="email"
                         id="profile-email"
-                        value="{{ $user['email'] }}"
+                        name="email"
+                        value="{{ old('email', $customer->email) }}"
                         class="input-phoenix"
                         required
                         aria-required="true"
@@ -89,7 +101,8 @@
                     <input
                         type="tel"
                         id="profile-phone"
-                        value="{{ $user['phone'] }}"
+                        name="phone"
+                        value="{{ old('phone', $customer->phone) }}"
                         class="input-phoenix"
                     />
                 </div>
@@ -99,11 +112,11 @@
                         <label for="profile-gender" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
                             @lang('phonix::app.account.profile.gender')
                         </label>
-                        <select id="profile-gender" class="input-phoenix">
+                        <select id="profile-gender" name="gender" class="input-phoenix">
                             <option value="">--</option>
-                            <option value="male" {{ $user['gender'] === 'male' ? 'selected' : '' }}>@lang('phonix::app.account.profile.gender_male')</option>
-                            <option value="female" {{ $user['gender'] === 'female' ? 'selected' : '' }}>@lang('phonix::app.account.profile.gender_female')</option>
-                            <option value="other" {{ $user['gender'] === 'other' ? 'selected' : '' }}>@lang('phonix::app.account.profile.gender_other')</option>
+                            <option value="male" {{ old('gender', $customer->gender) === 'male' ? 'selected' : '' }}>@lang('phonix::app.account.profile.gender_male')</option>
+                            <option value="female" {{ old('gender', $customer->gender) === 'female' ? 'selected' : '' }}>@lang('phonix::app.account.profile.gender_female')</option>
+                            <option value="other" {{ old('gender', $customer->gender) === 'other' ? 'selected' : '' }}>@lang('phonix::app.account.profile.gender_other')</option>
                         </select>
                     </div>
                     <div>
@@ -113,7 +126,8 @@
                         <input
                             type="date"
                             id="profile-dob"
-                            value="{{ $user['dob'] }}"
+                            name="date_of_birth"
+                            value="{{ old('date_of_birth', $customer->date_of_birth ? \Carbon\Carbon::parse($customer->date_of_birth)->format('Y-m-d') : '') }}"
                             class="input-phoenix"
                         />
                     </div>
@@ -134,17 +148,26 @@
             </h2>
 
             {{-- Success Message --}}
-            <div
-                x-show="passwordSaved"
-                x-transition
-                x-cloak
-                class="mb-[16px] p-[12px] rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300"
-                role="alert"
-            >
-                @lang('phonix::app.messages.success.password_changed')
-            </div>
+            @if(session()->has('password_success'))
+                <div
+                    class="mb-[16px] p-[12px] rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300"
+                    role="alert"
+                >
+                    @lang('phonix::app.messages.success.password_changed')
+                </div>
+            @endif
 
-            <form @submit.prevent="savePassword()" class="space-y-[16px]">
+            @if($errors->has('current_password'))
+                <div
+                    class="mb-[16px] p-[12px] rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300"
+                    role="alert"
+                >
+                    {{ $errors->first('current_password') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('phonix.account.password.update') }}" class="space-y-[16px]">
+                @csrf
                 {{-- Current Password --}}
                 <div>
                     <label for="current-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
@@ -154,6 +177,7 @@
                         <input
                             :type="showCurrentPassword ? 'text' : 'password'"
                             id="current-password"
+                            name="current_password"
                             class="input-phoenix pe-[44px]"
                             required
                             aria-required="true"
@@ -184,6 +208,7 @@
                         <input
                             :type="showNewPassword ? 'text' : 'password'"
                             id="new-password"
+                            name="new_password"
                             class="input-phoenix pe-[44px]"
                             required
                             aria-required="true"
@@ -215,6 +240,7 @@
                         <input
                             :type="showConfirmPassword ? 'text' : 'password'"
                             id="confirm-password"
+                            name="new_password_confirmation"
                             class="input-phoenix pe-[44px]"
                             required
                             aria-required="true"

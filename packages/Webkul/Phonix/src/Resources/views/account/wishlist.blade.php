@@ -46,7 +46,50 @@
     :title="__('phonix::app.account.wishlist.title')"
     :breadcrumbs="[['label' => __('phonix::app.account.wishlist.title')]]"
 >
-    <div class="space-y-[24px]" x-data="{ items: {{ Js::from($wishlistProducts) }} }">
+    <div
+        class="space-y-[24px]"
+        x-data="{
+            items: {{ Js::from($wishlistProducts) }},
+            csrfToken: '{{ csrf_token() }}',
+            removing: null,
+            movingToCart: null,
+
+            removeItem(index) {
+                const item = this.items[index];
+                this.removing = item.id;
+                fetch('/api/customer/wishlist/' + item.id, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.data !== undefined || data.message) {
+                        this.items.splice(index, 1);
+                    }
+                })
+                .catch(() => this.items.splice(index, 1))
+                .finally(() => this.removing = null);
+            },
+
+            moveToCart(index) {
+                const item = this.items[index];
+                this.movingToCart = item.id;
+                fetch('/api/customer/wishlist/' + item.id + '/move-to-cart', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.data !== undefined || data.message) {
+                        this.items.splice(index, 1);
+                        window.location.href = '{{ route('phonix.cart.index') }}';
+                    }
+                })
+                .catch(console.error)
+                .finally(() => this.movingToCart = null);
+            }
+        }"
+    >
         {{-- Page Title --}}
         <h1 class="text-fluid-xl font-bold text-slate-800 dark:text-slate-100" data-gsap="fade-up">
             @lang('phonix::app.account.wishlist.title')
@@ -74,12 +117,17 @@
 
                             {{-- Remove from Wishlist --}}
                             <button
-                                @click="items.splice(index, 1)"
-                                class="absolute top-[8px] end-[8px] z-10 w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white/90 dark:bg-dark-card/90 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+                                @click="removeItem(index)"
+                                :disabled="removing === product.id"
+                                class="absolute top-[8px] end-[8px] z-10 w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white/90 dark:bg-dark-card/90 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm disabled:opacity-50"
                                 :aria-label="'@lang('phonix::app.account.wishlist.remove')'"
                             >
-                                <svg class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg x-show="removing !== product.id" class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <svg x-show="removing === product.id" x-cloak class="w-[16px] h-[16px] animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                 </svg>
                             </button>
 
@@ -127,9 +175,17 @@
                             </div>
 
                             {{-- Move to Cart --}}
-                            <button class="btn-phoenix w-full text-sm py-[10px]">
-                                <svg class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <button
+                                @click="moveToCart(index)"
+                                :disabled="movingToCart === product.id"
+                                class="btn-phoenix w-full text-sm py-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <svg x-show="movingToCart !== product.id" class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                                </svg>
+                                <svg x-show="movingToCart === product.id" x-cloak class="w-[16px] h-[16px] animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                 </svg>
                                 @lang('phonix::app.account.wishlist.move_to_cart')
                             </button>

@@ -74,7 +74,7 @@
         {{-- View All link --}}
         <div class="text-center mt-[24px]">
             <a
-                href="#"
+                href="{{ route('phonix.products.index', ['sort' => 'price-asc']) }}"
                 class="inline-flex items-center gap-[6px] text-sm font-semibold text-phoenix-600 dark:text-phoenix-400 hover:text-phoenix-700 dark:hover:text-phoenix-300 transition-colors"
             >
                 @lang('phonix::app.deals.view_all_deals')

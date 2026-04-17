@@ -47,7 +47,7 @@
                 {{-- Column 1: Brand --}}
                 <div>
                     <a
-                        href="{{ url('/') }}"
+                        href="{{ route('phonix.home') }}"
                         class="inline-block mb-[16px]"
                         aria-label="@lang('phonix::app.theme.name')"
                     >
@@ -126,15 +126,22 @@
                     </h3>
                     <ul class="space-y-[10px]">
                         @php
-                            $quickLinks = ['about_us', 'contact_us', 'blog', 'careers', 'privacy_policy', 'terms_conditions'];
+                            $quickLinks = [
+                                ['key' => 'about_us',        'url' => route('phonix.products.index')],
+                                ['key' => 'contact_us',      'url' => route('phonix.products.index')],
+                                ['key' => 'blog',            'url' => route('phonix.products.index')],
+                                ['key' => 'careers',         'url' => route('phonix.products.index')],
+                                ['key' => 'privacy_policy',  'url' => route('phonix.products.index')],
+                                ['key' => 'terms_conditions','url' => route('phonix.products.index')],
+                            ];
                         @endphp
                         @foreach ($quickLinks as $link)
                             <li>
                                 <a
-                                    href="#"
+                                    href="{{ $link['url'] }}"
                                     class="text-sm text-slate-400 hover:text-phoenix-400 transition-colors"
                                 >
-                                    @lang('phonix::app.footer.links.' . $link)
+                                    @lang('phonix::app.footer.links.' . $link['key'])
                                 </a>
                             </li>
                         @endforeach
@@ -149,10 +156,10 @@
                     <ul class="space-y-[10px]">
                         @php
                             $serviceLinks = [
-                                ['key' => 'header.nav.track_order', 'url' => '#'],
-                                ['key' => 'footer.links.return_policy', 'url' => '#'],
-                                ['key' => 'footer.links.shipping_info', 'url' => '#'],
-                                ['key' => 'footer.links.faq', 'url' => '#'],
+                                ['key' => 'header.nav.track_order',    'url' => route('phonix.account.orders')],
+                                ['key' => 'footer.links.return_policy','url' => route('phonix.products.index')],
+                                ['key' => 'footer.links.shipping_info','url' => route('phonix.products.index')],
+                                ['key' => 'footer.links.faq',          'url' => route('phonix.products.index')],
                             ];
                         @endphp
                         @foreach ($serviceLinks as $sLink)

@@ -99,15 +99,13 @@
                                             >
                                                 @lang('phonix::app.account.orders.view')
                                             </a>
-                                            <template x-if="order.status === 'shipped'">
-                                                <a href="#" class="text-sm text-phoenix-600 dark:text-phoenix-400 hover:text-phoenix-700 dark:hover:text-phoenix-300 font-medium transition-colors">
+                                            <template x-if="order.status === 'shipped' || order.status === 'processing'">
+                                                <a
+                                                    :href="'{{ url('/phonix/account/orders') }}/' + order.id"
+                                                    class="text-sm text-phoenix-600 dark:text-phoenix-400 hover:text-phoenix-700 dark:hover:text-phoenix-300 font-medium transition-colors"
+                                                >
                                                     @lang('phonix::app.account.orders.track')
                                                 </a>
-                                            </template>
-                                            <template x-if="order.status === 'delivered'">
-                                                <button class="text-sm text-phoenix-600 dark:text-phoenix-400 hover:text-phoenix-700 dark:hover:text-phoenix-300 font-medium transition-colors">
-                                                    @lang('phonix::app.account.orders.reorder')
-                                                </button>
                                             </template>
                                         </div>
                                     </td>

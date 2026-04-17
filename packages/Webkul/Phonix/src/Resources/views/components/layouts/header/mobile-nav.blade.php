@@ -24,25 +24,20 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="translate-x-0"
     x-transition:leave-end="ltr:-translate-x-full rtl:translate-x-full"
-    class="fixed inset-y-0 start-0 z-50 w-[300px] max-w-[85vw] bg-white dark:bg-dark-bg shadow-xl overflow-y-auto scrollbar-thin lg:hidden"
+    class="fixed inset-y-0 start-0 z-[60] w-[300px] max-w-[85vw] bg-white dark:bg-dark-bg shadow-xl overflow-y-auto scrollbar-thin lg:hidden"
     role="dialog"
     aria-modal="true"
-    :aria-label="'@lang('phonix::app.header.nav.categories')'"
+    aria-label="@lang('phonix::app.general.menu')"
     @keydown.escape.window="mobileMenuOpen = false"
     x-cloak
 >
     {{-- Drawer Header --}}
     <div class="flex items-center justify-between p-[16px] border-b border-slate-100 dark:border-dark-border">
-        <a
-            href="{{ url('/') }}"
-            class="shrink-0"
-            aria-label="@lang('phonix::app.theme.name')"
-        >
+        <a href="{{ route('phonix.home') }}" class="shrink-0" @click="mobileMenuOpen = false" aria-label="@lang('phonix::app.theme.name')">
             <span class="text-fluid-lg font-poppins font-bold tracking-tight text-gradient-phoenix">
                 PHONIX
             </span>
         </a>
-
         <button
             @click="mobileMenuOpen = false"
             class="p-[8px] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
@@ -55,30 +50,69 @@
     </div>
 
     {{-- Navigation Links --}}
-    <nav class="p-[16px]" aria-label="@lang('phonix::app.header.nav.categories')">
-        @php
-            $mobileNavItems = [
-                ['key' => 'home', 'url' => url('/')],
-                ['key' => 'categories', 'url' => '#'],
-                ['key' => 'deals', 'url' => '#'],
-                ['key' => 'new_arrivals', 'url' => '#'],
-                ['key' => 'brands', 'url' => '#'],
-                ['key' => 'bestsellers', 'url' => '#'],
-                ['key' => 'support', 'url' => '#'],
-            ];
-        @endphp
-
+    <nav class="p-[16px]" aria-label="@lang('phonix::app.general.menu')">
         <ul class="space-y-[4px]">
-            @foreach ($mobileNavItems as $navItem)
-                <li>
-                    <a
-                        href="{{ $navItem['url'] }}"
-                        class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
-                    >
-                        @lang('phonix::app.header.nav.' . $navItem['key'])
-                    </a>
-                </li>
-            @endforeach
+            <li>
+                <a
+                    href="{{ route('phonix.home') }}"
+                    @click="mobileMenuOpen = false"
+                    class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                >
+                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    @lang('phonix::app.header.nav.home')
+                </a>
+            </li>
+            <li>
+                <a
+                    href="{{ route('phonix.products.index') }}"
+                    @click="mobileMenuOpen = false"
+                    class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                >
+                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                    </svg>
+                    @lang('phonix::app.header.nav.categories')
+                </a>
+            </li>
+            <li>
+                <a
+                    href="{{ route('phonix.products.index', ['sort' => 'price-asc']) }}"
+                    @click="mobileMenuOpen = false"
+                    class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                >
+                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                    </svg>
+                    @lang('phonix::app.header.nav.deals')
+                </a>
+            </li>
+            <li>
+                <a
+                    href="{{ route('phonix.products.index', ['sort' => 'created_at-desc']) }}"
+                    @click="mobileMenuOpen = false"
+                    class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                >
+                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    @lang('phonix::app.header.nav.new_arrivals')
+                </a>
+            </li>
+            <li>
+                <a
+                    href="{{ route('phonix.products.index') }}"
+                    @click="mobileMenuOpen = false"
+                    class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                >
+                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                    </svg>
+                    @lang('phonix::app.header.nav.brands')
+                </a>
+            </li>
         </ul>
     </nav>
 
@@ -95,7 +129,8 @@
             @guest('customer')
                 <li>
                     <a
-                        href="{{ route('shop.customer.session.index') }}"
+                        href="{{ route('phonix.auth.login') }}"
+                        @click="mobileMenuOpen = false"
                         class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors"
                     >
                         <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -106,7 +141,8 @@
                 </li>
                 <li>
                     <a
-                        href="{{ route('shop.customers.register.index') }}"
+                        href="{{ route('phonix.auth.register') }}"
+                        @click="mobileMenuOpen = false"
                         class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors"
                     >
                         <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -119,48 +155,43 @@
 
             @auth('customer')
                 <li>
-                    <a
-                        href="{{ route('shop.customers.account.profile.index') }}"
-                        class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors"
-                    >
-                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                        </svg>
-                        @lang('phonix::app.header.account.profile')
+                    <a href="{{ route('phonix.account.dashboard') }}" @click="mobileMenuOpen = false" class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors">
+                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3h7.5v7.5h-7.5V3zM3.75 13.5h7.5V21h-7.5v-7.5zM13.5 3h7.5v7.5H13.5V3zM13.5 13.5h7.5V21H13.5v-7.5z"/></svg>
+                        @lang('phonix::app.account.sidebar.dashboard')
                     </a>
                 </li>
                 <li>
-                    <a
-                        href="{{ route('shop.customers.account.orders.index') }}"
-                        class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors"
-                    >
-                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
+                    <a href="{{ route('phonix.account.orders') }}" @click="mobileMenuOpen = false" class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors">
+                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" /></svg>
                         @lang('phonix::app.header.account.orders')
                     </a>
                 </li>
                 <li>
-                    <a
-                        href="{{ route('shop.customers.account.wishlist.index') }}"
-                        class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors"
-                    >
-                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
+                    <a href="{{ route('phonix.account.wishlist') }}" @click="mobileMenuOpen = false" class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors">
+                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
                         @lang('phonix::app.header.account.wishlist')
                     </a>
                 </li>
                 <li>
-                    <a
-                        href="{{ route('shop.customer.session.destroy') }}"
-                        class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-coral hover:bg-red-50 dark:hover:bg-dark-surface rounded-md transition-colors"
-                    >
-                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                        </svg>
-                        @lang('phonix::app.header.account.logout')
+                    <a href="{{ route('phonix.account.profile') }}" @click="mobileMenuOpen = false" class="flex items-center gap-[12px] px-[12px] py-[10px] text-sm text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-md transition-colors">
+                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                        @lang('phonix::app.header.account.profile')
                     </a>
+                </li>
+                <li class="border-t border-slate-100 dark:border-dark-border pt-[4px] mt-[4px]">
+                    <form action="{{ route('shop.customer.session.destroy') }}" method="POST" id="mobile-logout-form">
+                        @csrf
+                        @method('DELETE')
+                        <button
+                            type="submit"
+                            class="flex items-center gap-[12px] w-full px-[12px] py-[10px] text-sm text-coral hover:bg-red-50 dark:hover:bg-dark-surface rounded-md transition-colors text-start"
+                        >
+                            <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                            </svg>
+                            @lang('phonix::app.header.account.logout')
+                        </button>
+                    </form>
                 </li>
             @endauth
         </ul>
@@ -209,5 +240,27 @@
                 </div>
             </div>
         @endif
+    </div>
+
+    {{-- Cart & Compare Quick Links --}}
+    <div class="border-t border-slate-100 dark:border-dark-border mx-[16px]"></div>
+    <div class="p-[16px] flex gap-[8px]">
+        <a
+            href="{{ route('phonix.cart.index') }}"
+            @click="mobileMenuOpen = false"
+            class="flex-1 flex items-center justify-center gap-[8px] py-[10px] px-[12px] bg-phoenix-500 hover:bg-phoenix-600 text-white text-sm font-medium rounded-md transition-colors"
+        >
+            <svg class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+            </svg>
+            @lang('phonix::app.header.cart.view_cart')
+        </a>
+        <a
+            href="{{ route('phonix.checkout.index') }}"
+            @click="mobileMenuOpen = false"
+            class="flex-1 flex items-center justify-center gap-[8px] py-[10px] px-[12px] bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-md transition-colors"
+        >
+            @lang('phonix::app.header.cart.checkout')
+        </a>
     </div>
 </div>

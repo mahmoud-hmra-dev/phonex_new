@@ -16,11 +16,11 @@
 
     $currentRoute = request()->route()?->getName() ?? '';
 
-    $user = [
-        'name'  => 'Ahmed Mohamed',
-        'email' => 'ahmed@example.com',
-    ];
-    $initials = collect(explode(' ', $user['name']))->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))->take(2)->implode('');
+    $customer = auth('customer')->user();
+    $fullName = trim(($customer->first_name ?? '') . ' ' . ($customer->last_name ?? ''));
+    $initials = collect(array_filter([$customer->first_name ?? '', $customer->last_name ?? '']))
+        ->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))
+        ->take(2)->implode('');
 @endphp
 
 <x-phonix::layouts.index :title="$title">
@@ -76,10 +76,10 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
-                                        {{ $user['name'] }}
+                                        {{ $fullName }}
                                     </p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                        {{ $user['email'] }}
+                                        {{ $customer->email }}
                                     </p>
                                 </div>
                             </div>
@@ -121,8 +121,9 @@
                                         </svg>
                                         @lang('phonix::app.account.sidebar.logout')
                                     </a>
-                                    <form id="logout-form" action="#" method="POST" class="hidden">
+                                    <form id="logout-form" action="{{ route('shop.customer.session.destroy') }}" method="POST" class="hidden">
                                         @csrf
+                                        @method('DELETE')
                                     </form>
                                 </li>
                             </ul>

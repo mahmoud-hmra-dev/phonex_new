@@ -24,7 +24,15 @@
                     @lang('phonix::app.auth.login.title')
                 </h1>
 
+                @if ($errors->any())
+                    <div class="mb-[16px] p-[12px] rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                        <p class="text-sm text-red-600 dark:text-red-400">{{ $errors->first() }}</p>
+                    </div>
+                @endif
+
                 <form
+                    method="POST"
+                    action="{{ route('phonix.auth.login.store') }}"
                     x-data="{
                         email: '',
                         password: '',
@@ -35,17 +43,13 @@
                             if (!this.email) this.errors.email = true;
                             if (!this.password) this.errors.password = true;
                             return Object.keys(this.errors).length === 0;
-                        },
-                        submit() {
-                            if (this.validate()) {
-                                // Form submission logic
-                            }
                         }
                     }"
-                    @submit.prevent="submit()"
+                    @submit.prevent="if (validate()) $el.submit()"
                     class="space-y-[16px]"
                     novalidate
                 >
+                    @csrf
                     {{-- Email --}}
                     <div>
                         <label for="login-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
@@ -54,6 +58,7 @@
                         <input
                             type="email"
                             id="login-email"
+                            name="email"
                             x-model="email"
                             class="input-phoenix"
                             :class="{ 'border-red-500 dark:border-red-400': errors.email }"
@@ -76,6 +81,7 @@
                             <input
                                 :type="show ? 'text' : 'password'"
                                 id="login-password"
+                                name="password"
                                 x-model="password"
                                 class="input-phoenix pe-[44px]"
                                 :class="{ 'border-red-500 dark:border-red-400': errors.password }"
@@ -108,6 +114,7 @@
                         <label class="flex items-center gap-[8px] cursor-pointer">
                             <input
                                 type="checkbox"
+                                name="remember"
                                 x-model="remember"
                                 class="w-[16px] h-[16px] rounded border-slate-300 dark:border-dark-border text-phoenix-500 focus:ring-phoenix-400"
                             />

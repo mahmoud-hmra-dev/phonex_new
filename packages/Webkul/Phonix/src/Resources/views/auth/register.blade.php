@@ -24,9 +24,20 @@
                     @lang('phonix::app.auth.register.title')
                 </h1>
 
+                @if ($errors->any())
+                    <div class="mb-[16px] p-[12px] rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                        @foreach ($errors->all() as $error)
+                            <p class="text-sm text-red-600 dark:text-red-400">{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+
                 <form
+                    method="POST"
+                    action="{{ route('phonix.auth.register.store') }}"
                     x-data="{
-                        name: '',
+                        first_name: '',
+                        last_name: '',
                         email: '',
                         password: '',
                         confirmPassword: '',
@@ -36,41 +47,60 @@
                         errors: {},
                         validate() {
                             this.errors = {};
-                            if (!this.name.trim()) this.errors.name = true;
+                            if (!this.first_name.trim()) this.errors.first_name = true;
+                            if (!this.last_name.trim()) this.errors.last_name = true;
                             if (!this.email.trim()) this.errors.email = true;
                             if (this.password.length < 8) this.errors.password = true;
                             if (this.password !== this.confirmPassword) this.errors.confirmPassword = true;
-                            if (!this.terms) this.errors.terms = true;
                             return Object.keys(this.errors).length === 0;
-                        },
-                        submit() {
-                            if (this.validate()) {
-                                // Form submission logic
-                            }
                         }
                     }"
-                    @submit.prevent="submit()"
+                    @submit.prevent="if (validate()) $el.submit()"
                     class="space-y-[16px]"
                     novalidate
                 >
-                    {{-- Name --}}
-                    <div>
-                        <label for="register-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
-                            @lang('phonix::app.auth.register.name')
-                        </label>
-                        <input
-                            type="text"
-                            id="register-name"
-                            x-model="name"
-                            class="input-phoenix"
-                            :class="{ 'border-red-500 dark:border-red-400': errors.name }"
-                            required
-                            aria-required="true"
-                            autocomplete="name"
-                        />
-                        <p x-show="errors.name" x-cloak class="text-xs text-red-500 mt-[4px]" role="alert">
-                            @lang('phonix::app.messages.error.validation_failed')
-                        </p>
+                    @csrf
+
+                    {{-- First Name + Last Name --}}
+                    <div class="grid grid-cols-2 gap-[12px]">
+                        <div>
+                            <label for="register-first-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
+                                @lang('phonix::app.auth.register.first_name')
+                            </label>
+                            <input
+                                type="text"
+                                id="register-first-name"
+                                name="first_name"
+                                x-model="first_name"
+                                class="input-phoenix"
+                                :class="{ 'border-red-500 dark:border-red-400': errors.first_name }"
+                                required
+                                aria-required="true"
+                                autocomplete="given-name"
+                            />
+                            <p x-show="errors.first_name" x-cloak class="text-xs text-red-500 mt-[4px]" role="alert">
+                                @lang('phonix::app.messages.error.validation_failed')
+                            </p>
+                        </div>
+                        <div>
+                            <label for="register-last-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
+                                @lang('phonix::app.auth.register.last_name')
+                            </label>
+                            <input
+                                type="text"
+                                id="register-last-name"
+                                name="last_name"
+                                x-model="last_name"
+                                class="input-phoenix"
+                                :class="{ 'border-red-500 dark:border-red-400': errors.last_name }"
+                                required
+                                aria-required="true"
+                                autocomplete="family-name"
+                            />
+                            <p x-show="errors.last_name" x-cloak class="text-xs text-red-500 mt-[4px]" role="alert">
+                                @lang('phonix::app.messages.error.validation_failed')
+                            </p>
+                        </div>
                     </div>
 
                     {{-- Email --}}
@@ -81,6 +111,7 @@
                         <input
                             type="email"
                             id="register-email"
+                            name="email"
                             x-model="email"
                             class="input-phoenix"
                             :class="{ 'border-red-500 dark:border-red-400': errors.email }"
@@ -103,6 +134,7 @@
                             <input
                                 :type="showPass ? 'text' : 'password'"
                                 id="register-password"
+                                name="password"
                                 x-model="password"
                                 class="input-phoenix pe-[44px]"
                                 :class="{ 'border-red-500 dark:border-red-400': errors.password }"
@@ -140,6 +172,7 @@
                             <input
                                 :type="showConfirmPass ? 'text' : 'password'"
                                 id="register-confirm-password"
+                                name="password_confirmation"
                                 x-model="confirmPassword"
                                 class="input-phoenix pe-[44px]"
                                 :class="{ 'border-red-500 dark:border-red-400': errors.confirmPassword }"

@@ -1,32 +1,28 @@
 {{-- Account Dashboard --}}
 @php
-    $user = [
-        'name'  => 'Ahmed Mohamed',
-        'email' => 'ahmed@example.com',
-        'phone' => '+966 50 123 4567',
-    ];
+    $customer  = auth('customer')->user();
+    $fullName  = trim(($customer->first_name ?? '') . ' ' . ($customer->last_name ?? ''));
+
+    // Real order stats
+    $allOrders       = $customer->orders()->latest()->get();
+    $totalOrders     = $allOrders->count();
+    $pendingOrders   = $allOrders->whereIn('status', ['pending', 'processing'])->count();
+    $completedOrders = $allOrders->where('status', 'completed')->count();
+    $wishlistCount   = $customer->wishlist_items()->count();
 
     $stats = [
-        ['key' => 'total_orders', 'value' => 12, 'icon' => 'M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z', 'color' => 'phoenix'],
-        ['key' => 'wishlist_items', 'value' => 4, 'icon' => 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', 'color' => 'coral'],
-        ['key' => 'pending_orders', 'value' => 2, 'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'gold'],
-        ['key' => 'completed_orders', 'value' => 8, 'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'green'],
+        ['key' => 'total_orders',     'value' => $totalOrders,     'icon' => 'M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z', 'color' => 'phoenix'],
+        ['key' => 'wishlist_items',   'value' => $wishlistCount,   'icon' => 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', 'color' => 'coral'],
+        ['key' => 'pending_orders',   'value' => $pendingOrders,   'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'gold'],
+        ['key' => 'completed_orders', 'value' => $completedOrders, 'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'green'],
     ];
 
-    $recentOrders = [
-        ['id' => 'PNX-10001', 'date' => '2024-03-15', 'status' => 'delivered', 'total' => 5898, 'items' => 3],
-        ['id' => 'PNX-10002', 'date' => '2024-03-20', 'status' => 'shipped', 'total' => 899, 'items' => 1],
-        ['id' => 'PNX-10003', 'date' => '2024-03-22', 'status' => 'processing', 'total' => 2499, 'items' => 2],
-        ['id' => 'PNX-10004', 'date' => '2024-03-25', 'status' => 'pending', 'total' => 349, 'items' => 1],
-    ];
+    // Real recent orders (latest 5)
+    $recentOrders = $allOrders->take(5);
 
-    $defaultAddress = [
-        'name'    => 'Ahmed Mohamed',
-        'phone'   => '+966 50 123 4567',
-        'address' => '123 King Fahd Road',
-        'city'    => 'Riyadh',
-        'country' => 'Saudi Arabia',
-    ];
+    // Real default address
+    $defaultAddress = $customer->addresses()->where('default_address', 1)->first()
+                    ?? $customer->addresses()->first();
 
     $statusColors = [
         'pending'    => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -34,6 +30,7 @@
         'shipped'    => 'bg-phoenix-100 text-phoenix-800 dark:bg-phoenix-900/30 dark:text-phoenix-300',
         'delivered'  => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
         'cancelled'  => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+        'completed'  => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     ];
 @endphp
 
@@ -45,7 +42,7 @@
         {{-- Welcome Message --}}
         <div data-gsap="fade-up">
             <h1 class="text-fluid-xl font-bold text-slate-800 dark:text-slate-100">
-                @lang('phonix::app.account.dashboard.welcome', ['name' => $user['name']])
+                @lang('phonix::app.account.dashboard.welcome', ['name' => $fullName])
             </h1>
         </div>
 
@@ -102,52 +99,62 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($recentOrders as $order)
+                        @forelse ($recentOrders as $order)
                             <tr class="border-b border-slate-50 dark:border-dark-border/50 last:border-0 hover:bg-slate-50/50 dark:hover:bg-dark-surface/50 transition-colors">
-                                <td class="p-[16px] font-medium text-slate-800 dark:text-slate-200">{{ $order['id'] }}</td>
-                                <td class="p-[16px] text-slate-600 dark:text-slate-400">{{ \Carbon\Carbon::parse($order['date'])->format('M d, Y') }}</td>
+                                <td class="p-[16px] font-medium text-slate-800 dark:text-slate-200">#{{ $order->increment_id }}</td>
+                                <td class="p-[16px] text-slate-600 dark:text-slate-400">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td class="p-[16px]">
-                                    <span class="inline-flex items-center px-[10px] py-[3px] rounded-full text-xs font-semibold {{ $statusColors[$order['status']] ?? '' }}">
-                                        @lang('phonix::app.account.order_status.' . $order['status'])
+                                    <span class="inline-flex items-center px-[10px] py-[3px] rounded-full text-xs font-semibold {{ $statusColors[$order->status] ?? '' }}">
+                                        @lang('phonix::app.account.order_status.' . $order->status)
                                     </span>
                                 </td>
-                                <td class="p-[16px] text-end font-semibold text-slate-800 dark:text-slate-200">${{ number_format($order['total'], 2) }}</td>
+                                <td class="p-[16px] text-end font-semibold text-slate-800 dark:text-slate-200">{{ core()->currency($order->grand_total) }}</td>
                                 <td class="p-[16px] text-end">
                                     <a
-                                        href="{{ route('phonix.account.orders.view', ['id' => $order['id']]) }}"
+                                        href="{{ route('phonix.account.orders.view', ['id' => $order->id]) }}"
                                         class="text-sm text-phoenix-600 dark:text-phoenix-400 hover:text-phoenix-700 dark:hover:text-phoenix-300 font-medium transition-colors"
                                     >
                                         @lang('phonix::app.account.orders.view')
                                     </a>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="p-[24px] text-center text-sm text-slate-500 dark:text-slate-400">
+                                    @lang('phonix::app.account.orders.no_orders')
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
 
             {{-- Mobile Cards --}}
             <div class="md:hidden p-[16px] space-y-[12px]">
-                @foreach ($recentOrders as $order)
+                @forelse ($recentOrders as $order)
                     <div class="p-[12px] rounded-md bg-slate-50 dark:bg-dark-surface">
                         <div class="flex items-center justify-between mb-[8px]">
-                            <span class="font-medium text-sm text-slate-800 dark:text-slate-200">{{ $order['id'] }}</span>
-                            <span class="inline-flex items-center px-[8px] py-[2px] rounded-full text-xs font-semibold {{ $statusColors[$order['status']] ?? '' }}">
-                                @lang('phonix::app.account.order_status.' . $order['status'])
+                            <span class="font-medium text-sm text-slate-800 dark:text-slate-200">#{{ $order->increment_id }}</span>
+                            <span class="inline-flex items-center px-[8px] py-[2px] rounded-full text-xs font-semibold {{ $statusColors[$order->status] ?? '' }}">
+                                @lang('phonix::app.account.order_status.' . $order->status)
                             </span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
-                            <span class="text-slate-500 dark:text-slate-400">{{ \Carbon\Carbon::parse($order['date'])->format('M d, Y') }}</span>
-                            <span class="font-semibold text-slate-800 dark:text-slate-200">${{ number_format($order['total'], 2) }}</span>
+                            <span class="text-slate-500 dark:text-slate-400">{{ $order->created_at->format('M d, Y') }}</span>
+                            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ core()->currency($order->grand_total) }}</span>
                         </div>
                         <a
-                            href="{{ route('phonix.account.orders.view', ['id' => $order['id']]) }}"
+                            href="{{ route('phonix.account.orders.view', ['id' => $order->id]) }}"
                             class="block mt-[8px] text-center text-sm text-phoenix-600 dark:text-phoenix-400 font-medium"
                         >
                             @lang('phonix::app.account.orders.view')
                         </a>
                     </div>
-                @endforeach
+                @empty
+                    <p class="text-center text-sm text-slate-500 dark:text-slate-400 py-[12px]">
+                        @lang('phonix::app.account.orders.no_orders')
+                    </p>
+                @endforelse
             </div>
         </div>
 
@@ -161,15 +168,15 @@
                 <div class="space-y-[12px] text-sm">
                     <div class="flex justify-between">
                         <span class="text-slate-500 dark:text-slate-400">@lang('phonix::app.account.profile.name')</span>
-                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ $user['name'] }}</span>
+                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ $fullName }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-500 dark:text-slate-400">@lang('phonix::app.account.profile.email')</span>
-                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ $user['email'] }}</span>
+                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ $customer->email }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-500 dark:text-slate-400">@lang('phonix::app.account.profile.phone')</span>
-                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ $user['phone'] }}</span>
+                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ $customer->phone ?? '—' }}</span>
                     </div>
                 </div>
                 <a
@@ -187,10 +194,16 @@
                 </h2>
                 @if ($defaultAddress)
                     <div class="text-sm space-y-[4px] text-slate-600 dark:text-slate-400">
-                        <p class="font-medium text-slate-800 dark:text-slate-200">{{ $defaultAddress['name'] }}</p>
-                        <p>{{ $defaultAddress['phone'] }}</p>
-                        <p>{{ $defaultAddress['address'] }}</p>
-                        <p>{{ $defaultAddress['city'] }}, {{ $defaultAddress['country'] }}</p>
+                        <p class="font-medium text-slate-800 dark:text-slate-200">
+                            {{ trim(($defaultAddress->first_name ?? '') . ' ' . ($defaultAddress->last_name ?? '')) ?: $fullName }}
+                        </p>
+                        @if($defaultAddress->phone)
+                            <p>{{ $defaultAddress->phone }}</p>
+                        @endif
+                        @if($defaultAddress->address)
+                            <p>{{ is_array($defaultAddress->address) ? implode(', ', array_filter($defaultAddress->address)) : $defaultAddress->address }}</p>
+                        @endif
+                        <p>{{ implode(', ', array_filter([$defaultAddress->city, $defaultAddress->country])) }}</p>
                     </div>
                 @else
                     <p class="text-sm text-slate-500 dark:text-slate-400">

@@ -103,6 +103,9 @@
             @if ($hasFooter)
                 <x-phonix::layouts.footer />
             @endif
+
+            {{-- Compare Bar (global, persisted in localStorage) --}}
+            <x-phonix::compare-bar />
         </div>
 
         @stack('scripts')

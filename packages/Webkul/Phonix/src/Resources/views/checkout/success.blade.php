@@ -97,11 +97,11 @@
 
             {{-- Actions --}}
             <div class="flex flex-col sm:flex-row items-center justify-center gap-[16px]" data-gsap="fade-up">
-                <x-phonix::button variant="primary" size="lg" href="#">
+                <x-phonix::button variant="primary" size="lg" href="{{ route('phonix.account.orders') }}">
                     <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                     @lang('phonix::app.checkout.success.track_order')
                 </x-phonix::button>
-                <x-phonix::button variant="outline" size="lg" href="/">
+                <x-phonix::button variant="outline" size="lg" href="{{ route('phonix.products.index') }}">
                     @lang('phonix::app.checkout.success.continue_shopping')
                 </x-phonix::button>
             </div>
