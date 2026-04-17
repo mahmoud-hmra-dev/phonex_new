@@ -71,7 +71,7 @@
             {{-- Navigation arrows --}}
             <button
                 @click="prev()"
-                class="absolute top-1/2 -translate-y-1/2 -start-[4px] md:-start-[20px] flex items-center justify-center w-[40px] h-[40px] rounded-full bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border shadow-md text-slate-500 dark:text-slate-400 hover:bg-phoenix-500 hover:text-white hover:border-phoenix-500 transition-all z-10"
+                class="absolute top-1/2 -translate-y-1/2 start-0 md:-start-[20px] flex items-center justify-center w-[40px] h-[40px] rounded-full bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border shadow-md text-slate-500 dark:text-slate-400 hover:bg-phoenix-500 hover:text-white hover:border-phoenix-500 transition-all z-10"
                 aria-label="@lang('phonix::app.general.previous')"
             >
                 <svg class="w-[20px] h-[20px] rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -80,7 +80,7 @@
             </button>
             <button
                 @click="next()"
-                class="absolute top-1/2 -translate-y-1/2 -end-[4px] md:-end-[20px] flex items-center justify-center w-[40px] h-[40px] rounded-full bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border shadow-md text-slate-500 dark:text-slate-400 hover:bg-phoenix-500 hover:text-white hover:border-phoenix-500 transition-all z-10"
+                class="absolute top-1/2 -translate-y-1/2 end-0 md:-end-[20px] flex items-center justify-center w-[40px] h-[40px] rounded-full bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border shadow-md text-slate-500 dark:text-slate-400 hover:bg-phoenix-500 hover:text-white hover:border-phoenix-500 transition-all z-10"
                 aria-label="@lang('phonix::app.general.next')"
             >
                 <svg class="w-[20px] h-[20px] rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

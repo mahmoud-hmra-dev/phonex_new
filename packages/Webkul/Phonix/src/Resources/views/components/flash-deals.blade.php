@@ -47,7 +47,7 @@
         </div>
 
         {{-- Products horizontal scroll --}}
-        <div class="relative">
+        <div class="relative overflow-hidden">
             <div class="flex gap-[16px] md:gap-[24px] overflow-x-auto scrollbar-thin pb-[16px] snap-x snap-mandatory">
                 @foreach ($products as $product)
                     @php
@@ -55,7 +55,7 @@
                         $hasSpecialPrice = $product->getTypeInstance()->haveDiscount();
                         $avgRating = $product->reviews->count() > 0 ? round($product->reviews->avg('rating')) : 0;
                     @endphp
-                    <div class="flex-shrink-0 w-[260px] md:w-[280px] snap-start">
+                    <div class="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[280px] snap-start">
                         <x-phonix::product-card
                             :productId="$product->id"
                             :name="$product->name"

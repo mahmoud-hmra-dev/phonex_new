@@ -85,7 +85,7 @@
             @lang('phonix::app.general.skip_to_content', [], 'Skip to main content')
         </a>
 
-        <div id="app">
+        <div id="app" class="overflow-x-hidden">
             {{-- Page Header --}}
             @if ($hasHeader)
                 <x-phonix::layouts.header />
