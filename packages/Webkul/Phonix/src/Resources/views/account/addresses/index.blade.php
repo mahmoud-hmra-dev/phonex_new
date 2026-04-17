@@ -307,15 +307,10 @@
                                 @lang('phonix::app.account.addresses.country') <span class="text-red-500">*</span>
                             </label>
                             <select x-model="form.country" class="input-phoenix" required aria-required="true">
-                                <option value="">--</option>
-                                <option value="SA">Saudi Arabia</option>
-                                <option value="AE">United Arab Emirates</option>
-                                <option value="KW">Kuwait</option>
-                                <option value="BH">Bahrain</option>
-                                <option value="QA">Qatar</option>
-                                <option value="OM">Oman</option>
-                                <option value="EG">Egypt</option>
-                                <option value="JO">Jordan</option>
+                                <option value="">@lang('phonix::app.checkout.form.select_country')</option>
+                                @foreach (core()->countries() as $country)
+                                    <option value="{{ $country->code }}">{{ $country->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

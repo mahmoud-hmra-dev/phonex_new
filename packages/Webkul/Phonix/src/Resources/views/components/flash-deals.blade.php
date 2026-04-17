@@ -10,7 +10,7 @@
                     <h2 class="text-fluid-2xl font-bold text-slate-900 dark:text-white">
                         @lang('phonix::app.deals.flash_deal')
                     </h2>
-                    <x-phonix::badge type="hot">HOT</x-phonix::badge>
+                    <x-phonix::badge type="hot">@lang('phonix::app.product.hot')</x-phonix::badge>
                 </div>
                 <div class="flex items-center justify-center gap-[8px]">
                     <span class="w-[32px] h-[2px] bg-phoenix-300 dark:bg-phoenix-600 rounded-full"></span>
