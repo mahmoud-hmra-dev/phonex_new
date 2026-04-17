@@ -14,7 +14,48 @@
 ])
 
 <div
-    x-data="{ hovered: false }"
+    x-data="{
+        hovered: false,
+        cartLoading: false,
+        wishlistLoading: false,
+        inWishlist: false,
+        productId: {{ $productId ?? 'null' }},
+        csrfToken: document.querySelector('meta[name=csrf-token]')?.content ?? '',
+
+        async addToCart() {
+            if (!this.productId) { window.location.href = {{ json_encode($url) }}; return; }
+            this.cartLoading = true;
+            try {
+                const res = await fetch('/api/checkout/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken },
+                    body: JSON.stringify({ product_id: this.productId, quantity: 1 })
+                });
+                if (res.ok) { window.location.href = '{{ route('phonix.cart.index') }}'; }
+                else { window.location.href = {{ json_encode($url) }}; }
+            } catch(e) { window.location.href = {{ json_encode($url) }}; }
+            finally { this.cartLoading = false; }
+        },
+
+        async toggleWishlist() {
+            if (!this.productId) return;
+            this.wishlistLoading = true;
+            try {
+                const method = this.inWishlist ? 'DELETE' : 'POST';
+                const url = this.inWishlist
+                    ? '/api/customer/wishlist/' + this.productId
+                    : '/api/customer/wishlist';
+                const body = this.inWishlist ? null : JSON.stringify({ product_id: this.productId });
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken },
+                    body
+                });
+                if (res.ok) { this.inWishlist = !this.inWishlist; }
+            } catch(e) {}
+            finally { this.wishlistLoading = false; }
+        }
+    }"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
     class="card-phoenix group overflow-hidden"
@@ -62,11 +103,18 @@
         >
             {{-- Wishlist --}}
             <button
-                class="flex items-center justify-center w-[40px] h-[40px] bg-white dark:bg-dark-card rounded-md shadow-md hover:bg-phoenix-500 hover:text-white text-slate-600 dark:text-slate-300 transition-colors"
+                @click.stop="toggleWishlist()"
+                :disabled="wishlistLoading"
+                :class="inWishlist ? 'bg-red-500 text-white' : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-300 hover:bg-phoenix-500 hover:text-white'"
+                class="flex items-center justify-center w-[40px] h-[40px] rounded-md shadow-md transition-colors disabled:opacity-50"
                 aria-label="@lang('phonix::app.product.add_to_wishlist')"
             >
-                <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg x-show="!wishlistLoading" class="w-[18px] h-[18px]" :fill="inWishlist ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+                <svg x-show="wishlistLoading" x-cloak class="w-[16px] h-[16px] animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                 </svg>
             </button>
 
@@ -140,16 +188,21 @@
         </div>
 
         {{-- Add to Cart --}}
-        <x-phonix::button
-            variant="primary"
-            size="sm"
-            class="w-full"
+        <button
+            @click="addToCart()"
+            :disabled="cartLoading"
+            class="btn-phoenix w-full text-sm py-[10px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-[6px]"
             aria-label="@lang('phonix::app.product.add_to_cart') - {{ $name }}"
         >
-            <svg class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg x-show="!cartLoading" class="w-[16px] h-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
             </svg>
-            @lang('phonix::app.product.add_to_cart')
-        </x-phonix::button>
+            <svg x-show="cartLoading" x-cloak class="w-[16px] h-[16px] animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <span x-show="!cartLoading">@lang('phonix::app.product.add_to_cart')</span>
+            <span x-show="cartLoading" x-cloak>@lang('phonix::app.general.loading')</span>
+        </button>
     </div>
 </div>

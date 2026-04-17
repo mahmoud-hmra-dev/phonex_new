@@ -91,6 +91,10 @@
         compareList: [],
         priceMin: {{ $priceMin }},
         priceMax: {{ $priceMax }},
+        csrfToken: document.querySelector('meta[name=csrf-token]').content,
+        cartLoading: null,
+        wishlistLoading: null,
+        wishlistItems: [],
         toggleCompare(id) {
             const idx = this.compareList.indexOf(id);
             if (idx === -1) {
@@ -106,6 +110,56 @@
         },
         submitFilterForm() {
             this.$refs.filterForm.submit();
+        },
+        async addToCart(productId) {
+            if (this.cartLoading === productId) return;
+            this.cartLoading = productId;
+            try {
+                const res = await fetch('/api/checkout/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = '{{ route("phonix.cart.index") }}';
+                }
+            } catch(e) { console.error(e); }
+            finally { this.cartLoading = null; }
+        },
+        async toggleWishlist(productId) {
+            if (this.wishlistLoading === productId) return;
+            this.wishlistLoading = productId;
+            try {
+                const isIn = this.wishlistItems.includes(productId);
+                const res = await fetch(isIn
+                    ? `/api/customer/wishlist/${productId}`
+                    : '/api/customer/wishlist',
+                    {
+                        method: isIn ? 'DELETE' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken
+                        },
+                        body: isIn ? null : JSON.stringify({ product_id: productId })
+                    }
+                );
+                if (res.ok) {
+                    if (isIn) {
+                        this.wishlistItems = this.wishlistItems.filter(id => id !== productId);
+                    } else {
+                        this.wishlistItems.push(productId);
+                    }
+                } else if (res.status === 401) {
+                    window.location.href = '{{ route("phonix.auth.login") }}';
+                }
+            } catch(e) { console.error(e); }
+            finally { this.wishlistLoading = null; }
         }
     }"
     class="container mx-auto section-padding"
@@ -881,6 +935,9 @@
                                 {{-- Wishlist button (top-end corner) --}}
                                 <button
                                     type="button"
+                                    @click="toggleWishlist({{ $product->id }})"
+                                    :disabled="wishlistLoading === {{ $product->id }}"
+                                    :class="{ 'text-red-500 border-red-400': wishlistItems.includes({{ $product->id }}) }"
                                     class="absolute top-[8px] end-[8px] z-10 flex items-center justify-center w-[34px] h-[34px] rounded-full bg-white/90 dark:bg-dark-card/90 backdrop-blur-sm shadow-sm text-slate-400 hover:text-coral dark:hover:text-coral transition-colors"
                                     aria-label="@lang('phonix::app.product.add_to_wishlist') - {{ $product->name }}"
                                 >
@@ -975,6 +1032,8 @@
                                 {{-- Add to cart --}}
                                 <button
                                     type="button"
+                                    @click="addToCart({{ $product->id }})"
+                                    :disabled="cartLoading === {{ $product->id }}"
                                     class="btn-phoenix w-full py-[9px] text-xs font-semibold flex items-center justify-center gap-[6px]"
                                     aria-label="@lang('phonix::app.product.add_to_cart') - {{ $product->name }}"
                                 >
@@ -1114,6 +1173,9 @@
                                         {{-- Wishlist --}}
                                         <button
                                             type="button"
+                                            @click="toggleWishlist({{ $product->id }})"
+                                            :disabled="wishlistLoading === {{ $product->id }}"
+                                            :class="{ 'text-red-500 border-red-400': wishlistItems.includes({{ $product->id }}) }"
                                             class="flex items-center justify-center w-[36px] h-[36px] rounded-lg border border-slate-200 dark:border-dark-border text-slate-400 hover:border-coral hover:text-coral transition-colors"
                                             aria-label="@lang('phonix::app.product.add_to_wishlist') - {{ $product->name }}"
                                         >
@@ -1141,6 +1203,8 @@
                                         {{-- Add to cart --}}
                                         <button
                                             type="button"
+                                            @click="addToCart({{ $product->id }})"
+                                            :disabled="cartLoading === {{ $product->id }}"
                                             class="btn-phoenix flex items-center gap-[6px] px-[16px] py-[8px] text-xs font-semibold"
                                             aria-label="@lang('phonix::app.product.add_to_cart') - {{ $product->name }}"
                                         >

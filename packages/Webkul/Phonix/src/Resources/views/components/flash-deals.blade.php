@@ -57,6 +57,7 @@
                     @endphp
                     <div class="flex-shrink-0 w-[260px] md:w-[280px] snap-start">
                         <x-phonix::product-card
+                            :productId="$product->id"
                             :name="$product->name"
                             :price="$hasSpecialPrice ? core()->currency($product->getTypeInstance()->getMinimalPrice()) : core()->currency($product->price)"
                             :originalPrice="$hasSpecialPrice ? core()->currency($product->price) : null"

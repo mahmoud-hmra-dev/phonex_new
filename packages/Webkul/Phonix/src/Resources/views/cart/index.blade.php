@@ -332,7 +332,7 @@
                                         <div class="col-span-5 flex items-center gap-4">
                                             {{-- Image --}}
                                             <a
-                                                :href="item.slug ? '{{ url('/') }}/' + item.slug : '#'"
+                                                :href="item.slug ? '{{ url('phonix/products') }}/' + item.slug : '#'"
                                                 class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card block"
                                                 tabindex="-1"
                                                 aria-hidden="true"
@@ -359,7 +359,7 @@
                                             {{-- Name + variant + SKU --}}
                                             <div class="min-w-0 space-y-1">
                                                 <a
-                                                    :href="item.slug ? '{{ url('/') }}/' + item.slug : '#'"
+                                                    :href="item.slug ? '{{ url('phonix/products') }}/' + item.slug : '#'"
                                                     class="block text-sm font-semibold text-slate-800 dark:text-slate-100 hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors duration-200 leading-snug line-clamp-2"
                                                     x-text="item.name"
                                                 ></a>
@@ -465,7 +465,7 @@
 
                                             {{-- Product image --}}
                                             <a
-                                                :href="item.slug ? '{{ url('/') }}/' + item.slug : '#'"
+                                                :href="item.slug ? '{{ url('phonix/products') }}/' + item.slug : '#'"
                                                 class="w-[72px] h-[72px] flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card block"
                                                 tabindex="-1"
                                                 aria-hidden="true"
@@ -486,7 +486,7 @@
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-start justify-between gap-2">
                                                     <a
-                                                        :href="item.slug ? '{{ url('/') }}/' + item.slug : '#'"
+                                                        :href="item.slug ? '{{ url('phonix/products') }}/' + item.slug : '#'"
                                                         class="text-sm font-semibold text-slate-800 dark:text-slate-100 hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors leading-snug line-clamp-2"
                                                         x-text="item.name"
                                                     ></a>

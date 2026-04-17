@@ -95,8 +95,8 @@
             $productCategory = $product->categories->first();
         @endphp
         <x-phonix::breadcrumb :items="array_filter([
-            ['label' => __('phonix::app.general.home'), 'url' => '/'],
-            ['label' => __('phonix::app.general.shop'), 'url' => '/'],
+            ['label' => __('phonix::app.general.home'), 'url' => route('phonix.home')],
+            ['label' => __('phonix::app.general.shop'), 'url' => route('phonix.products.index')],
             $productCategory ? ['label' => $productCategory->name, 'url' => route('phonix.categories.view', $productCategory->slug)] : null,
             ['label' => $product->name],
         ])" />
@@ -178,6 +178,54 @@
                 <div
                     x-data="{
                         quantity: 1,
+                        csrfToken: document.querySelector('meta[name=csrf-token]').content,
+                        cartLoading: false,
+                        wishlistLoading: false,
+                        inWishlist: false,
+                        async addToCart() {
+                            if (this.cartLoading) return;
+                            this.cartLoading = true;
+                            try {
+                                const res = await fetch('/api/checkout/cart', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': this.csrfToken
+                                    },
+                                    body: JSON.stringify({ product_id: {{ $product->id }}, quantity: this.quantity })
+                                });
+                                if (res.ok) {
+                                    window.location.href = '{{ route("phonix.cart.index") }}';
+                                }
+                            } catch(e) { console.error(e); }
+                            finally { this.cartLoading = false; }
+                        },
+                        async toggleWishlist() {
+                            if (this.wishlistLoading) return;
+                            this.wishlistLoading = true;
+                            try {
+                                const res = await fetch(this.inWishlist
+                                    ? '/api/customer/wishlist/{{ $product->id }}'
+                                    : '/api/customer/wishlist',
+                                    {
+                                        method: this.inWishlist ? 'DELETE' : 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': this.csrfToken
+                                        },
+                                        body: this.inWishlist ? null : JSON.stringify({ product_id: {{ $product->id }} })
+                                    }
+                                );
+                                if (res.ok) {
+                                    this.inWishlist = !this.inWishlist;
+                                } else if (res.status === 401) {
+                                    window.location.href = '{{ route("phonix.auth.login") }}';
+                                }
+                            } catch(e) { console.error(e); }
+                            finally { this.wishlistLoading = false; }
+                        }
                     }"
                 >
                     {{-- Stock Status --}}
@@ -236,15 +284,24 @@
 
                     {{-- Action Buttons --}}
                     <div class="flex flex-col sm:flex-row gap-[12px] mb-[24px]">
-                        <button class="btn-phoenix flex-1 px-[24px] py-[14px] text-sm"
-                            @click="window.location.href='{{ route('shop.api.checkout.cart.store') }}?product_id={{ $product->id }}&quantity=' + quantity"
+                        <button class="btn-phoenix flex-1 px-[24px] py-[14px] text-sm flex items-center justify-center gap-[8px]"
+                            @click="addToCart()"
+                            :disabled="cartLoading"
                         >
-                            <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                            </svg>
+                            <template x-if="cartLoading">
+                                <svg class="w-[18px] h-[18px] animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </template>
+                            <template x-if="!cartLoading">
+                                <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                            </template>
                             @lang('phonix::app.product.add_to_cart')
                         </button>
                         <button
+                            @click="toggleWishlist()"
+                            :disabled="wishlistLoading"
+                            :class="{ 'text-red-500 border-red-400 bg-red-50 dark:bg-red-900/20': inWishlist }"
                             class="flex items-center justify-center w-[48px] h-[48px] border-2 border-slate-200 dark:border-dark-border rounded-md text-slate-500 dark:text-slate-400 hover:border-coral hover:text-coral transition-colors shrink-0"
                             aria-label="@lang('phonix::app.product.add_to_wishlist')"
                         >
@@ -253,6 +310,7 @@
                             </svg>
                         </button>
                         <button
+                            @click="navigator.share ? navigator.share({ title: '{{ addslashes($product->name) }}', url: window.location.href }) : null"
                             class="flex items-center justify-center w-[48px] h-[48px] border-2 border-slate-200 dark:border-dark-border rounded-md text-slate-500 dark:text-slate-400 hover:border-phoenix-400 hover:text-phoenix-500 transition-colors shrink-0"
                             aria-label="@lang('phonix::app.product.share')"
                         >

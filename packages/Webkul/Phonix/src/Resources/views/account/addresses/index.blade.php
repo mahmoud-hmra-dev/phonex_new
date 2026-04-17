@@ -1,10 +1,24 @@
 {{-- My Addresses --}}
 @php
-    $addresses = [
-        ['id' => 1, 'name' => 'Ahmed Mohamed', 'phone' => '+966 50 123 4567', 'address' => '123 King Fahd Road', 'city' => 'Riyadh', 'state' => 'Riyadh Region', 'postcode' => '12345', 'country' => 'Saudi Arabia', 'default' => true],
-        ['id' => 2, 'name' => 'Ahmed Mohamed', 'phone' => '+966 55 987 6543', 'address' => '456 Olaya Street, Suite 7B', 'city' => 'Jeddah', 'state' => 'Makkah Region', 'postcode' => '21577', 'country' => 'Saudi Arabia', 'default' => false],
-        ['id' => 3, 'name' => 'Ahmed Work', 'phone' => '+966 50 111 2222', 'address' => '789 Prince Sultan Road', 'city' => 'Dammam', 'state' => 'Eastern Province', 'postcode' => '31411', 'country' => 'Saudi Arabia', 'default' => false],
-    ];
+    $customer = auth('customer')->user();
+    $addresses = $customer->addresses()->get();
+
+    $addressesData = $addresses->map(function ($addr) {
+        return [
+            'id'        => $addr->id,
+            'name'      => $addr->first_name . ' ' . $addr->last_name,
+            'first_name' => $addr->first_name ?? '',
+            'last_name'  => $addr->last_name ?? '',
+            'phone'     => $addr->phone ?? '',
+            'email'     => $addr->email ?? '',
+            'address'   => is_array($addr->address) ? implode(', ', array_filter($addr->address)) : ($addr->address ?? ''),
+            'city'      => $addr->city ?? '',
+            'state'     => $addr->state ?? '',
+            'postcode'  => $addr->postcode ?? '',
+            'country'   => $addr->country ?? '',
+            'isDefault' => (bool) $addr->default_address,
+        ];
+    })->values()->all();
 @endphp
 
 <x-phonix::account.layout
@@ -17,12 +31,51 @@
             showForm: false,
             editingId: null,
             deleteId: null,
-            form: { first_name: '', last_name: '', phone: '', address1: '', address2: '', city: '', state: '', postcode: '', country: '' },
-            openNew() { this.editingId = null; this.form = { first_name: '', last_name: '', phone: '', address1: '', address2: '', city: '', state: '', postcode: '', country: '' }; this.showForm = true; },
-            openEdit(addr) { this.editingId = addr.id; this.showForm = true; },
+            csrfToken: '{{ csrf_token() }}',
+            form: { first_name: '', last_name: '', email: '', phone: '', address: '', city: '', state: '', postcode: '', country: '' },
+            openNew() {
+                this.editingId = null;
+                this.form = { first_name: '', last_name: '', email: '', phone: '', address: '', city: '', state: '', postcode: '', country: '' };
+                this.showForm = true;
+            },
+            openEdit(addr) {
+                this.editingId = addr.id;
+                this.form = {
+                    first_name: addr.first_name,
+                    last_name: addr.last_name,
+                    email: addr.email || '',
+                    phone: addr.phone || '',
+                    address: addr.address || '',
+                    city: addr.city || '',
+                    state: addr.state || '',
+                    postcode: addr.postcode || '',
+                    country: addr.country || '',
+                };
+                this.showForm = true;
+            },
             closeForm() { this.showForm = false; this.editingId = null; },
             confirmDelete(id) { this.deleteId = id; },
             cancelDelete() { this.deleteId = null; },
+            async saveAddress() {
+                const url = this.editingId
+                    ? '/customer/account/addresses/edit/' + this.editingId
+                    : '/customer/account/addresses/create';
+                const formData = new FormData();
+                formData.append('_token', this.csrfToken);
+                formData.append('company_name', '');
+                formData.append('first_name', this.form.first_name || '');
+                formData.append('last_name', this.form.last_name || '');
+                formData.append('email', this.form.email || '');
+                formData.append('address[]', this.form.address || '');
+                formData.append('country', this.form.country || '');
+                formData.append('state', this.form.state || '');
+                formData.append('city', this.form.city || '');
+                formData.append('postcode', this.form.postcode || '');
+                formData.append('phone', this.form.phone || '');
+                if (this.editingId) formData.append('_method', 'PUT');
+                const res = await fetch(url, { method: 'POST', body: formData });
+                if (res.ok || res.redirected) { window.location.reload(); }
+            },
         }"
     >
         {{-- Page Title --}}
@@ -34,10 +87,10 @@
 
         {{-- Address Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-[16px]" data-gsap="fade-up">
-            @foreach ($addresses as $addr)
+            @foreach ($addressesData as $addr)
                 <div class="card-phoenix p-[20px] relative">
                     {{-- Default Badge --}}
-                    @if ($addr['default'])
+                    @if ($addr['isDefault'])
                         <span class="absolute top-[12px] end-[12px] inline-flex items-center px-[8px] py-[2px] rounded-full text-xs font-semibold bg-phoenix-100 text-phoenix-700 dark:bg-phoenix-900/30 dark:text-phoenix-300">
                             @lang('phonix::app.account.addresses.default')
                         </span>
@@ -45,10 +98,16 @@
 
                     <div class="text-sm space-y-[4px] text-slate-600 dark:text-slate-400 pe-[80px]">
                         <p class="font-semibold text-slate-800 dark:text-slate-200">{{ $addr['name'] }}</p>
-                        <p>{{ $addr['phone'] }}</p>
-                        <p>{{ $addr['address'] }}</p>
-                        <p>{{ $addr['city'] }}, {{ $addr['state'] }} {{ $addr['postcode'] }}</p>
-                        <p>{{ $addr['country'] }}</p>
+                        @if ($addr['phone'])
+                            <p>{{ $addr['phone'] }}</p>
+                        @endif
+                        @if ($addr['address'])
+                            <p>{{ $addr['address'] }}</p>
+                        @endif
+                        <p>{{ $addr['city'] }}@if ($addr['state']), {{ $addr['state'] }}@endif @if ($addr['postcode']) {{ $addr['postcode'] }}@endif</p>
+                        @if ($addr['country'])
+                            <p>{{ $addr['country'] }}</p>
+                        @endif
                     </div>
 
                     <div class="flex items-center gap-[12px] mt-[16px] pt-[12px] border-t border-slate-100 dark:border-dark-border">
@@ -63,7 +122,7 @@
                             @lang('phonix::app.general.edit')
                         </button>
 
-                        @if (!$addr['default'])
+                        @if (!$addr['isDefault'])
                             <button
                                 @click="confirmDelete({{ $addr['id'] }})"
                                 class="flex items-center gap-[4px] text-sm font-medium text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
@@ -76,10 +135,14 @@
                             </button>
                         @endif
 
-                        @if (!$addr['default'])
-                            <button class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 ms-auto transition-colors">
-                                @lang('phonix::app.account.addresses.set_default')
-                            </button>
+                        @if (!$addr['isDefault'])
+                            <form method="POST" action="/customer/account/addresses/edit/{{ $addr['id'] }}" class="ms-auto">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                                    @lang('phonix::app.account.addresses.set_default')
+                                </button>
+                            </form>
                         @endif
                     </div>
 
@@ -100,7 +163,14 @@
                             >
                                 @lang('phonix::app.general.cancel')
                             </button>
-                            <button class="inline-flex items-center justify-center px-[16px] py-[8px] text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors">
+                            <button
+                                @click="fetch('/customer/account/addresses/delete/{{ $addr['id'] }}', {
+                                    method: 'POST',
+                                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: '_token=' + csrfToken + '&_method=DELETE'
+                                }).then(() => window.location.reload())"
+                                class="inline-flex items-center justify-center px-[16px] py-[8px] text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
+                            >
                                 @lang('phonix::app.general.delete')
                             </button>
                         </div>
@@ -166,7 +236,7 @@
                 </div>
 
                 {{-- Form --}}
-                <form class="p-[20px] space-y-[16px]" @submit.prevent>
+                <form class="p-[20px] space-y-[16px]" @submit.prevent="saveAddress()">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
@@ -193,14 +263,7 @@
                         <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
                             @lang('phonix::app.account.addresses.address_line_1') <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" x-model="form.address1" class="input-phoenix" required aria-required="true" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-[6px]">
-                            @lang('phonix::app.account.addresses.address_line_2')
-                        </label>
-                        <input type="text" x-model="form.address2" class="input-phoenix" />
+                        <input type="text" x-model="form.address" class="input-phoenix" required aria-required="true" />
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
