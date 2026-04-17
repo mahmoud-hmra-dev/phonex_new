@@ -1,9 +1,33 @@
 @php
-    $cartItems = [
-        ['name' => 'iPhone 15 Pro Max', 'variant' => '256GB / Natural Titanium', 'price' => 4999, 'quantity' => 1, 'image' => null],
-        ['name' => 'AirPods Pro 2', 'variant' => 'USB-C', 'price' => 899, 'quantity' => 2, 'image' => null],
-        ['name' => 'Samsung Galaxy S24 Ultra', 'variant' => '512GB / Titanium Gray', 'price' => 4499, 'quantity' => 1, 'image' => null],
-        ['name' => 'Anker PowerCore 20000', 'variant' => 'Black', 'price' => 199, 'quantity' => 1, 'image' => null],
+    $cart = \Webkul\Checkout\Facades\Cart::getCart();
+
+    $cartItems = $cart
+        ? $cart->items->map(function ($item) {
+            $imageData = product_image()->getProductBaseImage($item->product);
+
+            $variantLabels = [];
+            if (! empty($item->additional['attributes'])) {
+                foreach ($item->additional['attributes'] as $attribute) {
+                    $variantLabels[] = $attribute['option_label'] ?? ($attribute['attribute_name'] ?? null);
+                }
+            }
+
+            return [
+                'id'       => $item->id,
+                'name'     => $item->name,
+                'variant'  => implode(' / ', array_filter($variantLabels)),
+                'price'    => (float) $item->price,
+                'quantity' => (int) $item->quantity,
+                'image'    => $imageData['small_image_url'] ?? null,
+            ];
+        })->values()->all()
+        : [];
+
+    $cartTotals = [
+        'shipping' => $cart ? (float) ($cart->shipping_amount ?? 0) : 0,
+        'tax'      => $cart ? (float) ($cart->tax_total ?? 0) : 0,
+        'discount' => $cart ? (float) ($cart->discount_amount ?? 0) : 0,
+        'coupon'   => $cart?->coupon_code,
     ];
 @endphp
 
@@ -75,10 +99,17 @@
                                 <div class="hidden md:grid md:grid-cols-12 gap-[16px] items-center">
                                     {{-- Product --}}
                                     <div class="col-span-5 flex items-center gap-[16px]">
-                                        <div class="w-[80px] h-[80px] flex-shrink-0 rounded-md bg-slate-100 dark:bg-dark-card overflow-hidden flex items-center justify-center border border-slate-200 dark:border-dark-border">
-                                            <svg class="w-[36px] h-[36px] text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
-                                            </svg>
+                                        <div class="w-[80px] h-[80px] flex-shrink-0 rounded-md bg-slate-100 dark:bg-dark-card overflow-hidden border border-slate-200 dark:border-dark-border">
+                                            <template x-if="item.image">
+                                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover" loading="lazy" />
+                                            </template>
+                                            <template x-if="!item.image">
+                                                <div class="w-full h-full flex items-center justify-center">
+                                                    <svg class="w-[36px] h-[36px] text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
+                                                    </svg>
+                                                </div>
+                                            </template>
                                         </div>
                                         <div class="min-w-0">
                                             <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate" x-text="item.name"></h3>
@@ -137,10 +168,17 @@
                                 {{-- Mobile Card --}}
                                 <div class="md:hidden">
                                     <div class="flex gap-[12px]">
-                                        <div class="w-[72px] h-[72px] flex-shrink-0 rounded-md bg-slate-100 dark:bg-dark-card overflow-hidden flex items-center justify-center border border-slate-200 dark:border-dark-border">
-                                            <svg class="w-[32px] h-[32px] text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
-                                            </svg>
+                                        <div class="w-[72px] h-[72px] flex-shrink-0 rounded-md bg-slate-100 dark:bg-dark-card overflow-hidden border border-slate-200 dark:border-dark-border">
+                                            <template x-if="item.image">
+                                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover" loading="lazy" />
+                                            </template>
+                                            <template x-if="!item.image">
+                                                <div class="w-full h-full flex items-center justify-center">
+                                                    <svg class="w-[32px] h-[32px] text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
+                                                    </svg>
+                                                </div>
+                                            </template>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-start justify-between">
@@ -306,9 +344,12 @@
         function cartPage() {
             return {
                 items: @json($cartItems),
-                couponCode: '',
-                couponApplied: false,
-                discountAmount: 500,
+                couponCode: @json($cartTotals['coupon'] ?? ''),
+                couponApplied: {{ ! empty($cartTotals['coupon']) ? 'true' : 'false' }},
+                discountAmount: {{ $cartTotals['discount'] }},
+                serverShipping: {{ $cartTotals['shipping'] }},
+                serverTax: {{ $cartTotals['tax'] }},
+                currency: @json(core()->getCurrentCurrencyCode()),
                 freeShippingThreshold: 10000,
 
                 get subtotal() {
@@ -316,11 +357,11 @@
                 },
 
                 get shippingCost() {
-                    return this.subtotal >= this.freeShippingThreshold ? 0 : 50;
+                    return this.serverShipping;
                 },
 
                 get tax() {
-                    return Math.round(this.subtotal * 0.15);
+                    return this.serverTax;
                 },
 
                 get freeShippingRemaining() {
@@ -332,7 +373,11 @@
                 },
 
                 formatPrice(amount) {
-                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR', minimumFractionDigits: 0 }).format(amount);
+                    try {
+                        return new Intl.NumberFormat(undefined, { style: 'currency', currency: this.currency, minimumFractionDigits: 0 }).format(amount);
+                    } catch (e) {
+                        return amount.toFixed(2) + ' ' + this.currency;
+                    }
                 },
 
                 incrementQty(index) {

@@ -19,12 +19,13 @@
                     <div class="relative w-full aspect-square">
                         {{-- Glow effect --}}
                         <div class="absolute inset-[15%] rounded-full bg-phoenix-500/15 blur-2xl"></div>
-                        {{-- Image placeholder --}}
-                        <div class="relative w-full h-full rounded-2xl bg-gradient-to-br from-phoenix-800/40 to-phoenix-900/40 border border-phoenix-500/20 flex items-center justify-center overflow-hidden">
-                            <div class="absolute inset-0 bg-gradient-to-t from-phoenix-500/5 to-transparent"></div>
-                            <svg class="w-[80px] h-[80px] md:w-[120px] md:h-[120px] text-phoenix-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                            </svg>
+                        {{-- Product image --}}
+                        <div class="relative w-full h-full rounded-2xl border border-phoenix-500/20 overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-t from-phoenix-500/5 to-transparent z-10"></div>
+                            <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&h=400&fit=crop"
+                                 alt="Samsung Galaxy S24 Ultra 512GB"
+                                 class="w-full h-full object-cover"
+                                 loading="lazy" />
                         </div>
                         {{-- Discount badge --}}
                         <div class="absolute -top-[8px] -end-[8px] flex items-center justify-center w-[64px] h-[64px] md:w-[72px] md:h-[72px] rounded-full bg-coral text-white font-bold text-sm md:text-base shadow-lg animate-pulse-glow" style="box-shadow: 0 0 20px rgba(255,107,107,0.4);">

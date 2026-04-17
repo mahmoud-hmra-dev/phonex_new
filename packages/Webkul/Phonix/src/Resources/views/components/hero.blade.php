@@ -83,20 +83,17 @@
             <div class="relative w-full aspect-square max-w-[420px]">
                 {{-- Glow ring --}}
                 <div class="absolute inset-[10%] rounded-full bg-phoenix-500/10 blur-2xl animate-pulse-glow"></div>
-                {{-- Main device placeholder --}}
-                <div class="relative w-full h-full rounded-2xl bg-gradient-to-br from-phoenix-800/50 via-dark-card/60 to-phoenix-900/50 border border-phoenix-500/20 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+                {{-- Main device image --}}
+                <div class="relative w-full h-full rounded-2xl border border-phoenix-500/20 backdrop-blur-sm overflow-hidden">
                     {{-- Inner glow --}}
-                    <div class="absolute inset-0 bg-gradient-to-t from-phoenix-500/5 via-transparent to-phoenix-400/5"></div>
-                    {{-- Device icon --}}
-                    <div class="relative text-center">
-                        <svg class="w-[80px] h-[80px] md:w-[120px] md:h-[120px] text-phoenix-400/60 mx-auto mb-[16px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                        </svg>
-                        <p class="text-phoenix-400/40 text-sm font-medium tracking-widest uppercase">Phonix</p>
-                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-phoenix-500/5 via-transparent to-phoenix-400/5 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=800&h=600&fit=crop"
+                         alt="Latest smartphones and devices"
+                         class="w-full h-full object-cover rounded-2xl"
+                         loading="eager" />
                     {{-- Corner accents --}}
-                    <div class="absolute top-[16px] end-[16px] w-[32px] h-[32px] border-t-2 border-e-2 border-phoenix-500/20 rounded-tr-lg"></div>
-                    <div class="absolute bottom-[16px] start-[16px] w-[32px] h-[32px] border-b-2 border-s-2 border-phoenix-500/20 rounded-bl-lg"></div>
+                    <div class="absolute top-[16px] end-[16px] w-[32px] h-[32px] border-t-2 border-e-2 border-phoenix-500/20 rounded-tr-lg z-10"></div>
+                    <div class="absolute bottom-[16px] start-[16px] w-[32px] h-[32px] border-b-2 border-s-2 border-phoenix-500/20 rounded-bl-lg z-10"></div>
                 </div>
             </div>
         </div>

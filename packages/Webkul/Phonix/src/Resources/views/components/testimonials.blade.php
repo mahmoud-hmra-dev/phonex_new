@@ -17,6 +17,11 @@
                     @php
                         $testimonials = __('phonix::app.testimonials.items');
                         $ratings = [5, 5, 5];
+                        $avatars = [
+                            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
+                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face',
+                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+                        ];
                     @endphp
 
                     @foreach ($testimonials as $index => $testimonial)
@@ -45,10 +50,11 @@
 
                                 {{-- Customer info --}}
                                 <div>
-                                    {{-- Avatar placeholder --}}
-                                    <div class="w-[48px] h-[48px] rounded-full bg-gradient-to-br from-phoenix-400 to-phoenix-600 flex items-center justify-center text-white font-bold text-lg mx-auto mb-[8px]">
-                                        {{ mb_substr($testimonial['name'], 0, 1) }}
-                                    </div>
+                                    {{-- Avatar --}}
+                                    <img src="{{ $avatars[$index] ?? $avatars[0] }}"
+                                         alt="{{ $testimonial['name'] }}"
+                                         class="w-[48px] h-[48px] rounded-full object-cover mx-auto mb-[8px]"
+                                         loading="lazy" />
                                     <p class="font-semibold text-slate-800 dark:text-white text-sm">
                                         {{ $testimonial['name'] }}
                                     </p>

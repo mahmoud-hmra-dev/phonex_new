@@ -1,232 +1,188 @@
+@inject('reviewHelper', 'Webkul\Product\Helpers\Review')
+@inject('productViewHelper', 'Webkul\Product\Helpers\View')
+
 @php
-    $product = [
-        'name' => 'iPhone 15 Pro Max',
-        'brand' => 'Apple',
-        'sku' => 'APL-IP15PM-256-BLK',
-        'category' => 'Smartphones',
-        'price' => '$1,199',
-        'original_price' => '$1,399',
-        'discount_percent' => 14,
-        'rating' => 4.8,
-        'reviews_count' => 234,
-        'short_description' => 'The most powerful iPhone ever. Featuring the A17 Pro chip, a 48MP camera system, titanium design, and the longest battery life ever in an iPhone. Available in Natural Titanium.',
-        'in_stock' => true,
-        'badge' => 'hot',
-        'slug' => $slug ?? 'iphone-15-pro-max',
-    ];
+    $avgRatings = $reviewHelper->getAverageRating($product);
+    $percentageRatings = $reviewHelper->getPercentageRating($product);
+    $customAttributeValues = $productViewHelper->getAdditionalData($product);
+    $attributeData = collect($customAttributeValues)->filter(fn ($item) => ! empty($item['value']));
 
-    $galleryImages = [
-        ['color' => 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'],
-        ['color' => 'linear-gradient(135deg, #0f3460 0%, #533483 100%)'],
-        ['color' => 'linear-gradient(135deg, #2d3436 0%, #636e72 100%)'],
-        ['color' => 'linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%)'],
-        ['color' => 'linear-gradient(135deg, #ffeaa7 0%, #dfe6e9 100%)'],
-    ];
+    $productBaseImage = product_image()->getProductBaseImage($product);
+    $galleryImages = product_image()->getGalleryImages($product);
 
-    $colorVariants = [
-        ['name' => 'Natural Titanium', 'hex' => '#8A8683'],
-        ['name' => 'Blue Titanium', 'hex' => '#3B4D5C'],
-        ['name' => 'White Titanium', 'hex' => '#E3E1DB'],
-        ['name' => 'Black Titanium', 'hex' => '#3C3C3D'],
-    ];
+    // Build gallery array for the product-gallery component
+    $galleryData = collect($galleryImages)->map(function($image) {
+        return [
+            'url' => $image['medium_image_url'] ?? $image['original_image_url'] ?? '',
+            'color' => null,
+        ];
+    })->toArray();
 
-    $storageVariants = [
-        ['label' => '256GB', 'price' => '$1,199'],
-        ['label' => '512GB', 'price' => '$1,399'],
-        ['label' => '1TB', 'price' => '$1,599'],
-    ];
+    // If no gallery images, use the base image
+    if (empty($galleryData)) {
+        $galleryData = [
+            ['url' => $productBaseImage['medium_image_url'] ?? '', 'color' => null],
+        ];
+    }
 
-    $specifications = [
-        ['label' => __('phonix::app.product.brand'), 'value' => 'Apple'],
-        ['label' => __('phonix::app.product.model'), 'value' => 'iPhone 15 Pro Max'],
-        ['label' => __('phonix::app.product.processor'), 'value' => 'A17 Pro (3nm)'],
-        ['label' => __('phonix::app.product.ram'), 'value' => '8GB'],
-        ['label' => __('phonix::app.product.storage'), 'value' => '256GB / 512GB / 1TB'],
-        ['label' => __('phonix::app.product.screen_size'), 'value' => '6.7" Super Retina XDR OLED'],
-        ['label' => __('phonix::app.product.battery'), 'value' => '4,441 mAh'],
-        ['label' => 'OS', 'value' => 'iOS 17'],
-        ['label' => __('phonix::app.product.color'), 'value' => 'Natural Titanium, Blue Titanium, White Titanium, Black Titanium'],
-        ['label' => 'Weight', 'value' => '221g'],
-    ];
+    $hasSpecialPrice = $product->getTypeInstance()->haveDiscount();
+    $specialPrice = $hasSpecialPrice ? $product->getTypeInstance()->getMinimalPrice() : null;
 
-    $productDescription = '
-        <h3>The Ultimate iPhone Experience</h3>
-        <p>iPhone 15 Pro Max is the most powerful iPhone ever made, forged in titanium with the groundbreaking A17 Pro chip. It features a 48MP Main camera with a new 5x Telephoto camera for incredible zoom capabilities.</p>
+    // Get reviews
+    $reviews = $product->reviews()->where('status', 'approved')->latest()->get();
 
-        <h4>Titanium Design</h4>
-        <p>iPhone 15 Pro Max features a strong and light aerospace-grade titanium design with a textured matte glass back. It also features a Ceramic Shield front that\'s tougher than any smartphone glass. And it\'s splash, water, and dust resistant.</p>
+    // Rating breakdown
+    $ratingBreakdown = [];
+    for ($i = 5; $i >= 1; $i--) {
+        $ratingBreakdown[$i] = $reviews->where('rating', $i)->count();
+    }
 
-        <h4>A17 Pro Chip</h4>
-        <p>A17 Pro is an entirely new class of iPhone chip that delivers the best graphics performance by far of any chip ever in iPhone. Mobile games will look and feel so immersive, with incredibly detailed environments and realistic characters.</p>
+    // Get related products
+    $relatedProducts = collect();
+    if ($product->related_products && $product->related_products->count()) {
+        $relatedProducts = $product->related_products->take(4);
+    } elseif ($product->up_sells && $product->up_sells->count()) {
+        $relatedProducts = $product->up_sells->take(4);
+    }
 
-        <h4>Pro Camera System</h4>
-        <p>Get incredible framing flexibility with 7 pro lenses. Capture super-high-resolution photos with more color and detail using the 48MP Main camera. And now you can take 48MP photos in HEIF with up to 4x the resolution.</p>
-    ';
+    // Fallback: get products from same categories
+    if ($relatedProducts->isEmpty()) {
+        $categoryIds = $product->categories->pluck('id')->toArray();
+        if (!empty($categoryIds)) {
+            $relatedProducts = app(\Webkul\Product\Repositories\ProductRepository::class)
+                ->scopeQuery(function($query) use ($product, $categoryIds) {
+                    return $query->distinct()
+                        ->addSelect('products.*')
+                        ->leftJoin('product_categories', 'products.id', '=', 'product_categories.product_id')
+                        ->whereIn('product_categories.category_id', $categoryIds)
+                        ->where('products.id', '!=', $product->id)
+                        ->inRandomOrder()
+                        ->limit(4);
+                })->get();
+        }
+    }
 
-    $reviews = [
-        [
-            'name' => 'Ahmed Al-Rashid',
-            'date' => 'March 15, 2026',
-            'rating' => 5,
-            'text' => 'Absolutely amazing phone! The camera quality is outstanding and the titanium design feels incredibly premium. Battery life lasts me a full day of heavy usage. Best iPhone yet.',
-        ],
-        [
-            'name' => 'Sarah Johnson',
-            'date' => 'February 28, 2026',
-            'rating' => 5,
-            'text' => 'The A17 Pro chip makes everything so smooth and fast. The 5x zoom camera is a game-changer for photography. Worth every penny for the upgrade from iPhone 14 Pro.',
-        ],
-        [
-            'name' => 'Mohammed Al-Faisal',
-            'date' => 'January 10, 2026',
-            'rating' => 4,
-            'text' => 'Great phone overall. The titanium build is lighter than expected. Only downside is the price, but if you can afford it, it\'s the best smartphone on the market right now.',
-        ],
-        [
-            'name' => 'Lisa Chen',
-            'date' => 'December 22, 2025',
-            'rating' => 5,
-            'text' => 'I\'ve been an Android user for years and this phone finally convinced me to switch. The ecosystem integration is seamless and the camera quality blows my old phone away.',
-        ],
-    ];
-
-    $ratingBreakdown = [5 => 156, 4 => 52, 3 => 18, 2 => 5, 1 => 3];
-
-    $relatedProducts = [
-        ['name' => 'Samsung Galaxy S24 Ultra', 'brand' => 'Samsung', 'price' => '$1,099', 'original_price' => '$1,299', 'rating' => 5, 'reviews' => 189, 'badge' => 'new', 'slug' => 'samsung-galaxy-s24-ultra', 'color' => 'linear-gradient(135deg, #0f3460 0%, #533483 100%)'],
-        ['name' => 'iPhone 15 Pro', 'brand' => 'Apple', 'price' => '$999', 'original_price' => null, 'rating' => 5, 'reviews' => 178, 'badge' => null, 'slug' => 'iphone-15-pro', 'color' => 'linear-gradient(135deg, #2d3436 0%, #636e72 100%)'],
-        ['name' => 'Xiaomi 14 Ultra', 'brand' => 'Xiaomi', 'price' => '$899', 'original_price' => '$999', 'rating' => 4, 'reviews' => 145, 'badge' => 'sale', 'slug' => 'xiaomi-14-ultra', 'color' => 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)'],
-        ['name' => 'AirPods Pro 2nd Gen', 'brand' => 'Apple', 'price' => '$229', 'original_price' => '$249', 'rating' => 5, 'reviews' => 428, 'badge' => 'hot', 'slug' => 'airpods-pro-2', 'color' => 'linear-gradient(135deg, #ffeaa7 0%, #dfe6e9 100%)'],
-    ];
+    // Determine badge
+    $badge = null;
+    if ($hasSpecialPrice) {
+        $badge = 'sale';
+    } elseif ($product->new) {
+        $badge = 'new';
+    }
 @endphp
 
-<x-phonix::layouts.index :title="$product['name'] . ' - Phonix'">
+@push('meta')
+    <meta name="description" content="{{ trim($product->meta_description) != '' ? $product->meta_description : \Illuminate\Support\Str::limit(strip_tags($product->description), 120, '') }}"/>
+    <meta name="keywords" content="{{ $product->meta_keywords }}"/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $product->name }}" />
+    <meta name="twitter:description" content="{!! htmlspecialchars(trim(strip_tags($product->description))) !!}" />
+    <meta name="twitter:image" content="{{ $productBaseImage['medium_image_url'] }}" />
+
+    <meta property="og:type" content="og:product" />
+    <meta property="og:title" content="{{ $product->name }}" />
+    <meta property="og:image" content="{{ $productBaseImage['medium_image_url'] }}" />
+    <meta property="og:description" content="{!! htmlspecialchars(trim(strip_tags($product->description))) !!}" />
+    <meta property="og:url" content="{{ route('phonix.products.view', ['slug' => $product->url_key]) }}" />
+@endPush
+
+<x-phonix::layouts.index :title="$product->name . ' - Phonix'">
 
     <div class="container mx-auto section-padding">
         {{-- Breadcrumb --}}
-        <x-phonix::breadcrumb :items="[
+        @php
+            $productCategory = $product->categories->first();
+        @endphp
+        <x-phonix::breadcrumb :items="array_filter([
             ['label' => __('phonix::app.general.home'), 'url' => '/'],
-            ['label' => __('phonix::app.general.shop'), 'url' => route('phonix.products.index')],
-            ['label' => $product['category'], 'url' => route('phonix.products.index')],
-            ['label' => $product['name']],
-        ]" />
+            ['label' => __('phonix::app.general.shop'), 'url' => '/'],
+            $productCategory ? ['label' => $productCategory->name, 'url' => route('phonix.categories.view', $productCategory->slug)] : null,
+            ['label' => $product->name],
+        ])" />
 
         {{-- Product Main Section --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-[32px] lg:gap-[48px] mb-[48px] lg:mb-[64px]">
             {{-- Gallery --}}
             <x-phonix::product-gallery
-                :images="$galleryImages"
-                :badge="$product['badge']"
-                :productName="$product['name']"
+                :images="$galleryData"
+                :badge="$badge"
+                :productName="$product->name"
                 data-gsap="fade-in"
             />
 
             {{-- Product Info --}}
             <div data-gsap="fade-up">
                 {{-- Brand --}}
-                <span class="text-xs font-semibold text-phoenix-600 dark:text-phoenix-400 uppercase tracking-wider">
-                    {{ $product['brand'] }}
-                </span>
+                @if($product->brand)
+                    <span class="text-xs font-semibold text-phoenix-600 dark:text-phoenix-400 uppercase tracking-wider">
+                        {{ $product->brand }}
+                    </span>
+                @endif
 
                 {{-- Name --}}
                 <h1 class="text-fluid-xl font-bold text-slate-900 dark:text-white mt-[4px] mb-[12px]">
-                    {{ $product['name'] }}
+                    {{ $product->name }}
                 </h1>
 
                 {{-- Rating --}}
-                <div class="flex items-center gap-[8px] mb-[16px]">
-                    <div class="flex items-center gap-[2px]">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <svg
-                                class="w-[16px] h-[16px] {{ $i <= round($product['rating']) ? 'text-gold' : 'text-slate-300 dark:text-slate-600' }}"
-                                fill="currentColor" viewBox="0 0 20 20"
-                            >
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                        @endfor
+                @if($reviews->count() > 0)
+                    <div class="flex items-center gap-[8px] mb-[16px]">
+                        <div class="flex items-center gap-[2px]">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <svg
+                                    class="w-[16px] h-[16px] {{ $i <= round($avgRatings) ? 'text-gold' : 'text-slate-300 dark:text-slate-600' }}"
+                                    fill="currentColor" viewBox="0 0 20 20"
+                                >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            @endfor
+                        </div>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ number_format($avgRatings, 1) }}</span>
+                        <a href="#panel-reviews" class="text-sm text-phoenix-600 dark:text-phoenix-400 hover:underline">
+                            @lang('phonix::app.product.reviews_count', ['count' => $reviews->count()])
+                        </a>
                     </div>
-                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $product['rating'] }}</span>
-                    <a href="#panel-reviews" class="text-sm text-phoenix-600 dark:text-phoenix-400 hover:underline">
-                        @lang('phonix::app.product.reviews_count', ['count' => $product['reviews_count']])
-                    </a>
-                </div>
+                @endif
 
                 {{-- Price --}}
                 <div class="flex items-center gap-[12px] mb-[16px]">
-                    <span class="text-fluid-lg font-bold text-phoenix-600 dark:text-phoenix-400">
-                        {{ $product['price'] }}
-                    </span>
-                    @if ($product['original_price'])
-                        <span class="text-base text-slate-400 line-through">
-                            {{ $product['original_price'] }}
+                    @if($hasSpecialPrice)
+                        <span class="text-fluid-lg font-bold text-phoenix-600 dark:text-phoenix-400">
+                            {{ core()->currency($specialPrice) }}
                         </span>
+                        <span class="text-base text-slate-400 line-through">
+                            {{ core()->currency($product->price) }}
+                        </span>
+                        @php
+                            $discountPercent = round((($product->price - $specialPrice) / $product->price) * 100);
+                        @endphp
                         <span class="badge-sale">
-                            @lang('phonix::app.product.save_percent', ['percent' => $product['discount_percent']])
+                            @lang('phonix::app.product.save_percent', ['percent' => $discountPercent])
+                        </span>
+                    @else
+                        <span class="text-fluid-lg font-bold text-phoenix-600 dark:text-phoenix-400">
+                            {{ core()->currency($product->price) }}
                         </span>
                     @endif
                 </div>
 
                 {{-- Short Description --}}
-                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-[20px]">
-                    {{ $product['short_description'] }}
-                </p>
+                @if($product->short_description)
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-[20px]">
+                        {{ $product->short_description }}
+                    </p>
+                @endif
 
-                {{-- Variant Selectors --}}
+                {{-- Quantity + Actions --}}
                 <div
                     x-data="{
-                        selectedColor: 0,
-                        selectedStorage: 0,
                         quantity: 1,
-                        colors: {{ json_encode($colorVariants) }},
-                        storages: {{ json_encode($storageVariants) }},
                     }"
                 >
-                    {{-- Color Selector --}}
-                    <div class="mb-[20px]">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-[8px]">
-                            @lang('phonix::app.product.select_color'):
-                            <span class="font-normal text-slate-500 dark:text-slate-400" x-text="colors[selectedColor].name"></span>
-                        </label>
-                        <div class="flex gap-[8px]">
-                            @foreach ($colorVariants as $index => $variant)
-                                <button
-                                    @click="selectedColor = {{ $index }}"
-                                    :class="selectedColor === {{ $index }} ? 'ring-2 ring-phoenix-500 ring-offset-2 dark:ring-offset-dark-bg' : 'ring-1 ring-slate-200 dark:ring-dark-border'"
-                                    class="w-[36px] h-[36px] rounded-full transition-all duration-200 hover:scale-110"
-                                    style="background-color: {{ $variant['hex'] }}"
-                                    :aria-pressed="(selectedColor === {{ $index }}).toString()"
-                                    aria-label="{{ $variant['name'] }}"
-                                    title="{{ $variant['name'] }}"
-                                ></button>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- Storage Selector --}}
-                    <div class="mb-[20px]">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-[8px]">
-                            @lang('phonix::app.product.select_storage')
-                        </label>
-                        <div class="flex flex-wrap gap-[8px]">
-                            @foreach ($storageVariants as $index => $variant)
-                                <button
-                                    @click="selectedStorage = {{ $index }}"
-                                    :class="selectedStorage === {{ $index }}
-                                        ? 'bg-phoenix-500 text-white border-phoenix-500 shadow-sm'
-                                        : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-400 border-slate-200 dark:border-dark-border hover:border-phoenix-400'"
-                                    class="px-[16px] py-[10px] text-sm font-medium rounded-md border-2 transition-all duration-200"
-                                    :aria-pressed="(selectedStorage === {{ $index }}).toString()"
-                                >
-                                    {{ $variant['label'] }}
-                                    <span class="block text-xs mt-[2px] opacity-80">{{ $variant['price'] }}</span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-
                     {{-- Stock Status --}}
                     <div class="flex items-center gap-[6px] mb-[20px]">
-                        @if ($product['in_stock'])
+                        @if ($product->haveSufficientQuantity(1))
                             <svg class="w-[16px] h-[16px] text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -280,14 +236,13 @@
 
                     {{-- Action Buttons --}}
                     <div class="flex flex-col sm:flex-row gap-[12px] mb-[24px]">
-                        <button class="btn-phoenix flex-1 px-[24px] py-[14px] text-sm">
+                        <button class="btn-phoenix flex-1 px-[24px] py-[14px] text-sm"
+                            @click="window.location.href='{{ route('shop.api.checkout.cart.store') }}?product_id={{ $product->id }}&quantity=' + quantity"
+                        >
                             <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                             </svg>
                             @lang('phonix::app.product.add_to_cart')
-                        </button>
-                        <button class="btn-phoenix-outline px-[24px] py-[14px] text-sm">
-                            @lang('phonix::app.product.buy_now')
                         </button>
                         <button
                             class="flex items-center justify-center w-[48px] h-[48px] border-2 border-slate-200 dark:border-dark-border rounded-md text-slate-500 dark:text-slate-400 hover:border-coral hover:text-coral transition-colors shrink-0"
@@ -310,9 +265,12 @@
 
                 {{-- Product Meta --}}
                 <div class="space-y-[6px] text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-dark-border pt-[16px] mb-[20px]">
-                    <p><span class="font-semibold text-slate-600 dark:text-slate-300">@lang('phonix::app.product.sku'):</span> {{ $product['sku'] }}</p>
-                    <p><span class="font-semibold text-slate-600 dark:text-slate-300">@lang('phonix::app.product.brand'):</span> {{ $product['brand'] }}</p>
-                    <p><span class="font-semibold text-slate-600 dark:text-slate-300">@lang('phonix::app.listing.filters.category'):</span> {{ $product['category'] }}</p>
+                    @if($product->sku)
+                        <p><span class="font-semibold text-slate-600 dark:text-slate-300">@lang('phonix::app.product.sku'):</span> {{ $product->sku }}</p>
+                    @endif
+                    @if($productCategory)
+                        <p><span class="font-semibold text-slate-600 dark:text-slate-300">@lang('phonix::app.listing.filters.category'):</span> {{ $productCategory->name }}</p>
+                    @endif
                 </div>
 
                 {{-- Trust Badges --}}
@@ -340,37 +298,63 @@
         </div>
 
         {{-- Product Tabs --}}
+        @php
+            // Build specifications from additional attributes
+            $specifications = [];
+            foreach ($attributeData as $attr) {
+                $specifications[] = ['label' => $attr['label'], 'value' => $attr['value']];
+            }
+
+            // Build reviews array for the tabs component
+            $reviewsForTabs = $reviews->map(function($review) {
+                return [
+                    'name' => $review->name,
+                    'date' => $review->created_at->format('F j, Y'),
+                    'rating' => $review->rating,
+                    'text' => $review->comment,
+                ];
+            })->toArray();
+        @endphp
+
         <x-phonix::product-tabs
-            :description="$productDescription"
+            :description="$product->description ?? ''"
             :specifications="$specifications"
-            :reviews="$reviews"
-            :averageRating="$product['rating']"
-            :totalReviews="$product['reviews_count']"
+            :reviews="$reviewsForTabs"
+            :averageRating="$avgRatings"
+            :totalReviews="$reviews->count()"
             :ratingBreakdown="$ratingBreakdown"
             class="mb-[48px] lg:mb-[64px]"
             data-gsap="fade-up"
         />
 
         {{-- Related Products --}}
-        <section data-gsap="fade-up">
-            <x-phonix::section-heading
-                :title="__('phonix::app.product.related_products')"
-            />
+        @if($relatedProducts->isNotEmpty())
+            <section data-gsap="fade-up">
+                <x-phonix::section-heading
+                    :title="__('phonix::app.product.related_products')"
+                />
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[16px]" data-gsap="stagger">
-                @foreach ($relatedProducts as $related)
-                    <x-phonix::product-card
-                        :name="$related['name']"
-                        :price="$related['price']"
-                        :originalPrice="$related['original_price']"
-                        :rating="$related['rating']"
-                        :reviewsCount="$related['reviews']"
-                        :badge="$related['badge']"
-                        :url="route('phonix.products.view', ['slug' => $related['slug']])"
-                    />
-                @endforeach
-            </div>
-        </section>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[16px]" data-gsap="stagger">
+                    @foreach ($relatedProducts as $related)
+                        @php
+                            $relatedImage = product_image()->getProductBaseImage($related);
+                            $relatedHasSpecial = $related->getTypeInstance()->haveDiscount();
+                            $relatedAvgRating = $related->reviews->count() > 0 ? round($related->reviews->avg('rating')) : 0;
+                        @endphp
+                        <x-phonix::product-card
+                            :name="$related->name"
+                            :price="$relatedHasSpecial ? core()->currency($related->getTypeInstance()->getMinimalPrice()) : core()->currency($related->price)"
+                            :originalPrice="$relatedHasSpecial ? core()->currency($related->price) : null"
+                            :rating="$relatedAvgRating"
+                            :reviewsCount="$related->reviews->count()"
+                            :badge="$relatedHasSpecial ? 'sale' : ($related->new ? 'new' : null)"
+                            :url="route('phonix.products.view', ['slug' => $related->url_key])"
+                            :imageUrl="$relatedImage['medium_image_url']"
+                        />
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </div>
 
 </x-phonix::layouts.index>

@@ -30,6 +30,12 @@ class PhonixServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath(__DIR__.'/../Resources/views/components', 'phonix');
 
         $this->loadRoutes();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Webkul\Phonix\Console\Commands\SeedProducts::class,
+            ]);
+        }
     }
 
     /**
@@ -37,14 +43,7 @@ class PhonixServiceProvider extends ServiceProvider
      */
     protected function registerConfig(): void
     {
-        $this->mergeConfigFrom(
-            dirname(__DIR__).'/Config/themes.php',
-            'themes.shop.phonix'
-        );
-
-        $this->publishes([
-            dirname(__DIR__).'/Config/themes.php' => config_path('phonix-themes.php'),
-        ], 'phonix-config');
+        // themes.php is already registered in config/themes.php directly
     }
 
     /**
@@ -52,6 +51,6 @@ class PhonixServiceProvider extends ServiceProvider
      */
     protected function loadRoutes(): void
     {
-        Route::middleware('web')->group(__DIR__.'/../Routes/shop-routes.php');
+        Route::middleware(['web', 'shop'])->group(__DIR__.'/../Routes/shop-routes.php');
     }
 }

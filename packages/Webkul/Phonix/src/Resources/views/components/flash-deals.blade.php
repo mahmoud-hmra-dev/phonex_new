@@ -1,3 +1,5 @@
+@props(['products' => collect()])
+
 {{-- Flash Deals Section --}}
 <section class="section-padding bg-slate-50 dark:bg-dark-surface" data-gsap="fade-up">
     <div class="container">
@@ -47,26 +49,22 @@
         {{-- Products horizontal scroll --}}
         <div class="relative">
             <div class="flex gap-[16px] md:gap-[24px] overflow-x-auto scrollbar-thin pb-[16px] snap-x snap-mandatory">
-                @php
-                    $flashProducts = [
-                        ['name' => 'iPhone 15 Pro Max', 'price' => '$1,099', 'originalPrice' => '$1,399', 'rating' => 5, 'reviewsCount' => 234, 'badge' => 'sale', 'discount' => '21%'],
-                        ['name' => 'Samsung Galaxy S24 Ultra', 'price' => '$999', 'originalPrice' => '$1,299', 'rating' => 5, 'reviewsCount' => 189, 'badge' => 'sale', 'discount' => '23%'],
-                        ['name' => 'MacBook Air M3', 'price' => '$899', 'originalPrice' => '$1,199', 'rating' => 5, 'reviewsCount' => 156, 'badge' => 'hot', 'discount' => '25%'],
-                        ['name' => 'Sony WH-1000XM5', 'price' => '$279', 'originalPrice' => '$399', 'rating' => 4, 'reviewsCount' => 312, 'badge' => 'sale', 'discount' => '30%'],
-                        ['name' => 'iPad Pro M4 12.9"', 'price' => '$899', 'originalPrice' => '$1,099', 'rating' => 5, 'reviewsCount' => 98, 'badge' => 'sale', 'discount' => '18%'],
-                        ['name' => 'Apple Watch Ultra 2', 'price' => '$699', 'originalPrice' => '$899', 'rating' => 4, 'reviewsCount' => 145, 'badge' => 'hot', 'discount' => '22%'],
-                    ];
-                @endphp
-
-                @foreach ($flashProducts as $product)
+                @foreach ($products as $product)
+                    @php
+                        $productImage = product_image()->getProductBaseImage($product);
+                        $hasSpecialPrice = $product->getTypeInstance()->haveDiscount();
+                        $avgRating = $product->reviews->count() > 0 ? round($product->reviews->avg('rating')) : 0;
+                    @endphp
                     <div class="flex-shrink-0 w-[260px] md:w-[280px] snap-start">
                         <x-phonix::product-card
-                            :name="$product['name']"
-                            :price="$product['price']"
-                            :originalPrice="$product['originalPrice']"
-                            :rating="$product['rating']"
-                            :reviewsCount="$product['reviewsCount']"
-                            :badge="$product['badge']"
+                            :name="$product->name"
+                            :price="$hasSpecialPrice ? core()->currency($product->getTypeInstance()->getMinimalPrice()) : core()->currency($product->price)"
+                            :originalPrice="$hasSpecialPrice ? core()->currency($product->price) : null"
+                            :rating="$avgRating"
+                            :reviewsCount="$product->reviews->count()"
+                            :badge="$hasSpecialPrice ? 'sale' : 'hot'"
+                            :imageUrl="$productImage['medium_image_url']"
+                            :url="route('phonix.products.view', ['slug' => $product->url_key])"
                         />
                     </div>
                 @endforeach

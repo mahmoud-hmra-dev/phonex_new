@@ -1,11 +1,45 @@
 {{-- My Wishlist --}}
 @php
-    $wishlistProducts = [
-        ['name' => 'Samsung Galaxy S24 Ultra', 'price' => '$1,299.00', 'originalPrice' => '$1,399.00', 'rating' => 5, 'reviewsCount' => 128, 'badge' => 'sale', 'url' => '#', 'image' => null],
-        ['name' => 'Sony WH-1000XM5 Headphones', 'price' => '$349.00', 'originalPrice' => null, 'rating' => 4, 'reviewsCount' => 89, 'badge' => 'bestseller', 'url' => '#', 'image' => null],
-        ['name' => 'MacBook Air M3 15"', 'price' => '$1,299.00', 'originalPrice' => null, 'rating' => 5, 'reviewsCount' => 256, 'badge' => 'new', 'url' => '#', 'image' => null],
-        ['name' => 'Apple Watch Ultra 2', 'price' => '$799.00', 'originalPrice' => '$849.00', 'rating' => 4, 'reviewsCount' => 67, 'badge' => null, 'url' => '#', 'image' => null],
-    ];
+    $customer = auth()->guard('customer')->user();
+
+    $wishlistProducts = $customer
+        ? $customer->wishlist_items()
+            ->with('product')
+            ->get()
+            ->filter(fn ($wishlist) => $wishlist->product !== null)
+            ->map(function ($wishlist) {
+                $product = $wishlist->product;
+                $imageData = product_image()->getProductBaseImage($product);
+                $prices = $product->getTypeInstance()->getProductPrices();
+
+                $finalPrice   = $prices['final']['price'] ?? ($prices['regular']['price'] ?? 0);
+                $regularPrice = $prices['regular']['price'] ?? null;
+                $onSale       = $regularPrice !== null && $finalPrice < $regularPrice;
+
+                $badge = null;
+                if ($product->new) {
+                    $badge = 'new';
+                } elseif ($onSale) {
+                    $badge = 'sale';
+                } elseif ($product->featured) {
+                    $badge = 'bestseller';
+                }
+
+                return [
+                    'id'            => $wishlist->id,
+                    'name'          => $product->name,
+                    'url'           => route('phonix.products.view', $product->url_key),
+                    'image'         => $imageData['small_image_url'] ?? null,
+                    'price'         => core()->currency($finalPrice),
+                    'originalPrice' => $onSale ? core()->currency($regularPrice) : null,
+                    'rating'        => 0,
+                    'reviewsCount'  => $product->reviews->count() ?? 0,
+                    'badge'         => $badge,
+                ];
+            })
+            ->values()
+            ->all()
+        : [];
 @endphp
 
 <x-phonix::account.layout
@@ -26,11 +60,16 @@
                         {{-- Image --}}
                         <div class="relative overflow-hidden aspect-square bg-slate-50 dark:bg-dark-surface">
                             <a :href="product.url" class="block w-full h-full">
-                                <div class="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
-                                    <svg class="w-[48px] h-[48px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                                    </svg>
-                                </div>
+                                <template x-if="product.image">
+                                    <img :src="product.image" :alt="product.name" class="w-full h-full object-cover" loading="lazy" />
+                                </template>
+                                <template x-if="!product.image">
+                                    <div class="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                                        <svg class="w-[48px] h-[48px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                                        </svg>
+                                    </div>
+                                </template>
                             </a>
 
                             {{-- Remove from Wishlist --}}

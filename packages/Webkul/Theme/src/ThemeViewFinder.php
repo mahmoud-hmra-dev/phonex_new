@@ -55,6 +55,8 @@ class ThemeViewFinder extends FileViewFinder
     {
         if ($isAdmin) {
             themes()->set(config('themes.admin-default'));
+        } elseif (! themes()->current()) {
+            themes()->set(config('themes.shop-default'));
         }
     }
 
