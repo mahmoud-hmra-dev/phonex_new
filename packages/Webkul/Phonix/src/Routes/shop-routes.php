@@ -66,6 +66,70 @@ Route::group(['prefix' => 'phonix'], function () {
         return view('phonix::cart.index');
     })->name('phonix.cart.index');
 
+    // Add to Cart — accepts product_id + quantity, handles simple & configurable
+    Route::post('/cart/add', function () {
+        $productId = (int) request('product_id');
+        $quantity  = max(1, (int) request('quantity', 1));
+
+        if (! $productId) {
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'Invalid product.'], 422);
+            }
+            return redirect()->back();
+        }
+
+        $product = app(\Webkul\Product\Repositories\ProductRepository::class)
+            ->with('parent')
+            ->find($productId);
+
+        if (! $product) {
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'Product not found.'], 404);
+            }
+            return redirect()->back();
+        }
+
+        // Configurable products must be configured on the product page
+        if ($product->type === 'configurable') {
+            $productUrl = route('phonix.products.view', ['slug' => $product->url_key]);
+            if (request()->expectsJson()) {
+                return response()->json(['redirect' => $productUrl], 200);
+            }
+            return redirect($productUrl);
+        }
+
+        try {
+            \Webkul\Checkout\Facades\Cart::addProduct($product, [
+                'product_id' => $productId,
+                'quantity'   => $quantity,
+            ]);
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success'  => true,
+                    'message'  => trans('shop::app.checkout.cart.item-add-to-cart'),
+                    'redirect' => route('phonix.cart.index'),
+                ]);
+            }
+
+            return redirect()->route('phonix.cart.index');
+
+        } catch (\Webkul\Product\Exceptions\InsufficientProductInventoryException $e) {
+            $productUrl = route('phonix.products.view', ['slug' => $product->url_key]);
+            if (request()->expectsJson()) {
+                return response()->json(['error' => $e->getMessage(), 'redirect' => $productUrl], 422);
+            }
+            return redirect($productUrl)->withErrors(['cart' => $e->getMessage()]);
+
+        } catch (\Exception $e) {
+            $productUrl = route('phonix.products.view', ['slug' => $product->url_key]);
+            if (request()->expectsJson()) {
+                return response()->json(['error' => $e->getMessage(), 'redirect' => $productUrl], 422);
+            }
+            return redirect($productUrl);
+        }
+    })->name('phonix.cart.add');
+
     Route::get('/checkout', function () {
         $cart = \Webkul\Checkout\Facades\Cart::getCart();
 
@@ -79,6 +143,43 @@ Route::group(['prefix' => 'phonix'], function () {
     Route::get('/checkout/success', function () {
         return view('phonix::checkout.success');
     })->name('phonix.checkout.success');
+
+    // Wishlist toggle — add or remove, works for guests (redirects to login)
+    Route::post('/wishlist/toggle', function () {
+        if (! auth('customer')->check()) {
+            if (request()->expectsJson()) {
+                return response()->json(['redirect' => route('phonix.auth.login')], 401);
+            }
+            return redirect()->route('phonix.auth.login');
+        }
+
+        $productId = (int) request('product_id');
+        $customer  = auth('customer')->user();
+
+        $wishlistRepo = app(\Webkul\Customer\Repositories\WishlistRepository::class);
+        $existing     = $wishlistRepo->findOneWhere([
+            'customer_id' => $customer->id,
+            'product_id'  => $productId,
+        ]);
+
+        if ($existing) {
+            $wishlistRepo->delete($existing->id);
+            $inWishlist = false;
+        } else {
+            $wishlistRepo->create([
+                'customer_id' => $customer->id,
+                'product_id'  => $productId,
+                'channel_id'  => core()->getCurrentChannel()->id,
+            ]);
+            $inWishlist = true;
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'in_wishlist' => $inWishlist]);
+        }
+
+        return redirect()->back();
+    })->name('phonix.wishlist.toggle');
 
     // --------------------------------------------------------------------------
     // Auth POST routes — handle login & register, redirect to Phonix pages
@@ -165,7 +266,114 @@ Route::group(['prefix' => 'phonix'], function () {
         Route::get('/account/orders/{id}', fn ($id) => view('phonix::account.orders.view', ['id' => $id]))->name('phonix.account.orders.view');
         Route::get('/account/addresses', fn () => view('phonix::account.addresses.index'))->name('phonix.account.addresses');
         Route::get('/account/wishlist', fn () => view('phonix::account.wishlist'))->name('phonix.account.wishlist');
+        Route::get('/account/reviews', fn () => view('phonix::account.reviews'))->name('phonix.account.reviews');
         Route::get('/account/profile', fn () => view('phonix::account.profile'))->name('phonix.account.profile');
+
+        // Address CRUD — wraps Shop logic, redirects back to Phonix
+        Route::post('/account/addresses', function () {
+            $customer = auth('customer')->user();
+            $addrRepo = app(\Webkul\Customer\Repositories\CustomerAddressRepository::class);
+
+            request()->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name'  => 'required|string|max:255',
+                'phone'      => 'required|string|max:20',
+                'address'    => 'required',
+                'city'       => 'required|string|max:255',
+                'country'    => 'nullable|string|max:10',
+                'state'      => 'nullable|string|max:255',
+                'postcode'   => 'nullable|string|max:20',
+            ]);
+
+            $address = is_array(request('address')) ? implode(PHP_EOL, array_filter(request('address'))) : request('address', '');
+
+            \Illuminate\Support\Facades\Event::dispatch('customer.addresses.create.before');
+
+            $customerAddress = $addrRepo->create([
+                'customer_id'   => $customer->id,
+                'company_name'  => request('company_name', ''),
+                'first_name'    => request('first_name'),
+                'last_name'     => request('last_name'),
+                'email'         => request('email', $customer->email),
+                'phone'         => request('phone'),
+                'address'       => $address,
+                'country'       => request('country', ''),
+                'state'         => request('state', ''),
+                'city'          => request('city'),
+                'postcode'      => request('postcode', ''),
+                'default_address' => 0,
+            ]);
+
+            \Illuminate\Support\Facades\Event::dispatch('customer.addresses.create.after', $customerAddress);
+
+            return redirect()->route('phonix.account.addresses')->with('success', true);
+        })->name('phonix.account.addresses.store');
+
+        Route::post('/account/addresses/{id}', function ($id) {
+            $customer = auth('customer')->user();
+            $addrRepo = app(\Webkul\Customer\Repositories\CustomerAddressRepository::class);
+            $existing = $addrRepo->findOneWhere(['id' => $id, 'customer_id' => $customer->id]);
+
+            if (! $existing) {
+                return redirect()->route('phonix.account.addresses');
+            }
+
+            $method = request('_method', 'PUT');
+
+            // PATCH = set as default
+            if (strtoupper($method) === 'PATCH') {
+                $addrRepo->where('customer_id', $customer->id)->update(['default_address' => 0]);
+                $addrRepo->update(['default_address' => 1], $id);
+                return redirect()->route('phonix.account.addresses');
+            }
+
+            // PUT = update address fields
+            request()->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name'  => 'required|string|max:255',
+                'phone'      => 'required|string|max:20',
+                'address'    => 'required',
+                'city'       => 'required|string|max:255',
+                'country'    => 'nullable|string|max:10',
+                'state'      => 'nullable|string|max:255',
+                'postcode'   => 'nullable|string|max:20',
+            ]);
+
+            $address = is_array(request('address')) ? implode(PHP_EOL, array_filter(request('address'))) : request('address', '');
+
+            \Illuminate\Support\Facades\Event::dispatch('customer.addresses.update.before', $id);
+
+            $addrRepo->update([
+                'company_name' => request('company_name', ''),
+                'first_name'   => request('first_name'),
+                'last_name'    => request('last_name'),
+                'email'        => request('email', $customer->email),
+                'phone'        => request('phone'),
+                'address'      => $address,
+                'country'      => request('country', ''),
+                'state'        => request('state', ''),
+                'city'         => request('city'),
+                'postcode'     => request('postcode', ''),
+            ], $id);
+
+            \Illuminate\Support\Facades\Event::dispatch('customer.addresses.update.after', $existing);
+
+            return redirect()->route('phonix.account.addresses')->with('success', true);
+        })->name('phonix.account.addresses.update');
+
+        Route::post('/account/addresses/{id}/delete', function ($id) {
+            $customer = auth('customer')->user();
+            $addrRepo = app(\Webkul\Customer\Repositories\CustomerAddressRepository::class);
+            $existing = $addrRepo->findOneWhere(['id' => $id, 'customer_id' => $customer->id]);
+
+            if ($existing) {
+                \Illuminate\Support\Facades\Event::dispatch('customer.addresses.delete.before', $id);
+                $addrRepo->delete($id);
+                \Illuminate\Support\Facades\Event::dispatch('customer.addresses.delete.after', $id);
+            }
+
+            return redirect()->route('phonix.account.addresses');
+        })->name('phonix.account.addresses.delete');
 
         // Profile update
         Route::post('/account/profile/update', function () {

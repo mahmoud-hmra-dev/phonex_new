@@ -1,4 +1,8 @@
 {{-- Phonix Theme - Mobile Navigation Drawer --}}
+@php
+    $navCategories = app(\Webkul\Category\Repositories\CategoryRepository::class)
+        ->getVisibleCategoryTree(core()->getCurrentChannel()->root_category_id);
+@endphp
 
 {{-- Backdrop --}}
 <div
@@ -64,17 +68,50 @@
                     @lang('phonix::app.header.nav.home')
                 </a>
             </li>
-            <li>
-                <a
-                    href="{{ route('phonix.products.index') }}"
-                    @click="mobileMenuOpen = false"
-                    class="flex items-center gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+            <li x-data="{ catOpen: false }">
+                <button
+                    type="button"
+                    @click="catOpen = !catOpen"
+                    class="flex items-center justify-between w-full gap-[12px] px-[12px] py-[12px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                    :aria-expanded="catOpen"
                 >
-                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                    <span class="flex items-center gap-[12px]">
+                        <svg class="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                        </svg>
+                        @lang('phonix::app.header.nav.categories')
+                    </span>
+                    <svg class="w-[16px] h-[16px] shrink-0 transition-transform" :class="catOpen && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>
-                    @lang('phonix::app.header.nav.categories')
-                </a>
+                </button>
+                <div
+                    x-show="catOpen"
+                    x-collapse
+                    x-cloak
+                    class="ms-[30px] mt-[4px] mb-[4px] space-y-[2px]"
+                >
+                    <a
+                        href="{{ route('phonix.products.index') }}"
+                        @click="mobileMenuOpen = false"
+                        class="flex items-center gap-[8px] px-[12px] py-[8px] text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                    >
+                        <svg class="w-[14px] h-[14px] shrink-0 text-phoenix-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                        </svg>
+                        @lang('phonix::app.listing.filters.all_categories')
+                    </a>
+                    @foreach ($navCategories as $navCat)
+                        <a
+                            href="{{ route('phonix.categories.view', ['slug' => $navCat->slug]) }}"
+                            @click="mobileMenuOpen = false"
+                            class="flex items-center gap-[8px] px-[12px] py-[8px] text-sm text-slate-600 dark:text-slate-400 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 rounded-md transition-colors"
+                        >
+                            <span class="w-[5px] h-[5px] rounded-full bg-phoenix-400 shrink-0"></span>
+                            {{ $navCat->name }}
+                        </a>
+                    @endforeach
+                </div>
             </li>
             <li>
                 <a
@@ -223,16 +260,20 @@
         </div>
 
         {{-- Language Switcher --}}
-        @if (core()->getCurrentChannel()->locales()->count() > 1)
+        @php
+            $mobileLocales = app(\Webkul\Core\Repositories\LocaleRepository::class)->all();
+            $mobileCurrentLocale = app()->getLocale();
+        @endphp
+        @if ($mobileLocales->count() > 1)
             <div class="px-[12px]">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-[8px]">
                     @lang('phonix::app.general.language')
                 </p>
                 <div class="flex flex-wrap gap-[8px]">
-                    @foreach (core()->getCurrentChannel()->locales()->orderBy('name')->get() as $locale)
+                    @foreach ($mobileLocales as $locale)
                         <a
-                            href="?locale={{ $locale->code }}"
-                            class="px-[12px] py-[6px] text-sm rounded-md border transition-colors {{ $locale->code === app()->getLocale() ? 'bg-phoenix-500 text-white border-phoenix-500' : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-400 border-slate-200 dark:border-dark-border hover:border-phoenix-400' }}"
+                            href="{{ url()->current() }}?locale={{ $locale->code }}"
+                            class="px-[12px] py-[6px] text-sm rounded-md border transition-colors {{ $locale->code === $mobileCurrentLocale ? 'bg-phoenix-500 text-white border-phoenix-500' : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-400 border-slate-200 dark:border-dark-border hover:border-phoenix-400' }}"
                         >
                             {{ $locale->name }}
                         </a>

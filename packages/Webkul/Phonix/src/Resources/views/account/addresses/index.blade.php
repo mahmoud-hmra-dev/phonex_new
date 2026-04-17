@@ -56,25 +56,34 @@
             closeForm() { this.showForm = false; this.editingId = null; },
             confirmDelete(id) { this.deleteId = id; },
             cancelDelete() { this.deleteId = null; },
-            async saveAddress() {
+            saveAddress() {
                 const url = this.editingId
-                    ? '/customer/account/addresses/edit/' + this.editingId
-                    : '/customer/account/addresses/create';
-                const formData = new FormData();
-                formData.append('_token', this.csrfToken);
-                formData.append('company_name', '');
-                formData.append('first_name', this.form.first_name || '');
-                formData.append('last_name', this.form.last_name || '');
-                formData.append('email', this.form.email || '');
-                formData.append('address[]', this.form.address || '');
-                formData.append('country', this.form.country || '');
-                formData.append('state', this.form.state || '');
-                formData.append('city', this.form.city || '');
-                formData.append('postcode', this.form.postcode || '');
-                formData.append('phone', this.form.phone || '');
-                if (this.editingId) formData.append('_method', 'PUT');
-                const res = await fetch(url, { method: 'POST', body: formData });
-                if (res.ok || res.redirected) { window.location.reload(); }
+                    ? '{{ route('phonix.account.addresses.update', ':id') }}'.replace(':id', this.editingId)
+                    : '{{ route('phonix.account.addresses.store') }}';
+                const f = document.createElement('form');
+                f.method = 'POST'; f.action = url; f.style.display = 'none';
+                const fields = {
+                    '_token': this.csrfToken,
+                    '_method': this.editingId ? 'PUT' : '',
+                    'company_name': '',
+                    'first_name':   this.form.first_name || '',
+                    'last_name':    this.form.last_name  || '',
+                    'email':        this.form.email      || '',
+                    'address[]':    this.form.address    || '',
+                    'country':      this.form.country    || '',
+                    'state':        this.form.state      || '',
+                    'city':         this.form.city       || '',
+                    'postcode':     this.form.postcode   || '',
+                    'phone':        this.form.phone      || '',
+                };
+                Object.entries(fields).forEach(([k, v]) => {
+                    if (k === '_method' && !v) return;
+                    const i = document.createElement('input');
+                    i.type = 'hidden'; i.name = k; i.value = v;
+                    f.appendChild(i);
+                });
+                document.body.appendChild(f);
+                f.submit();
             },
         }"
     >
@@ -136,9 +145,9 @@
                         @endif
 
                         @if (!$addr['isDefault'])
-                            <form method="POST" action="/customer/account/addresses/edit/{{ $addr['id'] }}" class="ms-auto">
+                            <form method="POST" action="{{ route('phonix.account.addresses.update', $addr['id']) }}" class="ms-auto">
                                 @csrf
-                                @method('PATCH')
+                                <input type="hidden" name="_method" value="PATCH">
                                 <button type="submit" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
                                     @lang('phonix::app.account.addresses.set_default')
                                 </button>
@@ -164,11 +173,16 @@
                                 @lang('phonix::app.general.cancel')
                             </button>
                             <button
-                                @click="fetch('/customer/account/addresses/delete/{{ $addr['id'] }}', {
-                                    method: 'POST',
-                                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
-                                    body: '_token=' + csrfToken + '&_method=DELETE'
-                                }).then(() => window.location.reload())"
+                                @click="
+                                    const f = document.createElement('form');
+                                    f.method = 'POST';
+                                    f.action = '{{ route('phonix.account.addresses.delete', $addr['id']) }}';
+                                    f.style.display = 'none';
+                                    const ti = document.createElement('input');
+                                    ti.type='hidden'; ti.name='_token'; ti.value=csrfToken;
+                                    f.appendChild(ti);
+                                    document.body.appendChild(f); f.submit();
+                                "
                                 class="inline-flex items-center justify-center px-[16px] py-[8px] text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
                             >
                                 @lang('phonix::app.general.delete')

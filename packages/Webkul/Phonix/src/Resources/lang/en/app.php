@@ -178,9 +178,10 @@ return [
     ],
 
     'listing' => [
-        'title'         => 'Products',
-        'subtitle'      => 'Discover our full range of premium electronics and smart devices.',
-        'results_count' => ':count Results',
+        'title'          => 'Products',
+        'subtitle'       => 'Discover our full range of premium electronics and smart devices.',
+        'results_count'  => ':count Results',
+        'products_count' => 'Products',
         'no_results'    => 'No results found.',
         'showing'       => 'Showing',
         'of'            => 'of',
@@ -526,9 +527,15 @@ return [
         ],
 
         'reviews' => [
-            'title'      => 'My Reviews',
-            'my_reviews' => 'My Reviews',
-            'no_reviews' => 'You haven\'t written any reviews yet.',
+            'title'           => 'My Reviews',
+            'my_reviews'      => 'My Reviews',
+            'no_reviews'      => 'You haven\'t written any reviews yet.',
+            'no_reviews_message' => 'Purchase products and share your experience with other shoppers.',
+            'status' => [
+                'approved'    => 'Approved',
+                'disapproved' => 'Rejected',
+                'pending'     => 'Pending',
+            ],
         ],
     ],
 

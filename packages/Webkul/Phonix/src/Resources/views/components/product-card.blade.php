@@ -22,36 +22,37 @@
         productId: {{ $productId ?? 'null' }},
         csrfToken: document.querySelector('meta[name=csrf-token]')?.content ?? '',
 
-        async addToCart() {
+        addToCart() {
             if (!this.productId) { window.location.href = {{ json_encode($url) }}; return; }
             this.cartLoading = true;
-            try {
-                const res = await fetch('/api/checkout/cart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken },
-                    body: JSON.stringify({ product_id: this.productId, quantity: 1 })
-                });
-                if (res.ok) { window.location.href = '{{ route('phonix.cart.index') }}'; }
-                else { window.location.href = {{ json_encode($url) }}; }
-            } catch(e) { window.location.href = {{ json_encode($url) }}; }
-            finally { this.cartLoading = false; }
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('phonix.cart.add') }}';
+            form.style.display = 'none';
+            const token = document.createElement('input');
+            token.type = 'hidden'; token.name = '_token'; token.value = this.csrfToken;
+            const pid = document.createElement('input');
+            pid.type = 'hidden'; pid.name = 'product_id'; pid.value = this.productId;
+            const qty = document.createElement('input');
+            qty.type = 'hidden'; qty.name = 'quantity'; qty.value = 1;
+            form.appendChild(token); form.appendChild(pid); form.appendChild(qty);
+            document.body.appendChild(form);
+            form.submit();
         },
 
         async toggleWishlist() {
             if (!this.productId) return;
             this.wishlistLoading = true;
             try {
-                const method = this.inWishlist ? 'DELETE' : 'POST';
-                const url = this.inWishlist
-                    ? '/api/customer/wishlist/' + this.productId
-                    : '/api/customer/wishlist';
-                const body = this.inWishlist ? null : JSON.stringify({ product_id: this.productId });
-                const res = await fetch(url, {
-                    method,
+                const res = await fetch('{{ route('phonix.wishlist.toggle') }}', {
+                    method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken },
-                    body
+                    body: JSON.stringify({ product_id: this.productId })
                 });
-                if (res.ok) { this.inWishlist = !this.inWishlist; }
+                const data = await res.json();
+                if (res.status === 401 && data.redirect) { window.location.href = data.redirect; return; }
+                if (data.success) { this.inWishlist = data.in_wishlist; }
             } catch(e) {}
             finally { this.wishlistLoading = false; }
         }

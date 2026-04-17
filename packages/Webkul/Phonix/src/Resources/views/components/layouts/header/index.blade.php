@@ -1,3 +1,8 @@
+@php
+    $navCategories = app(\Webkul\Category\Repositories\CategoryRepository::class)
+        ->getVisibleCategoryTree(core()->getCurrentChannel()->root_category_id);
+@endphp
+
 {{-- Phonix Theme - Premium Sticky Header --}}
 <header
     x-data="{
@@ -138,12 +143,48 @@
                 >
                     @lang('phonix::app.header.nav.home')
                 </a>
-                <a
-                    href="{{ route('phonix.products.index') }}"
-                    class="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors"
-                >
-                    @lang('phonix::app.header.nav.categories')
-                </a>
+                {{-- Categories Dropdown --}}
+                <div x-data="{ catOpen: false }" class="relative" @click.away="catOpen = false">
+                    <button
+                        @click="catOpen = !catOpen"
+                        class="flex items-center gap-[4px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors"
+                        :aria-expanded="catOpen"
+                    >
+                        @lang('phonix::app.header.nav.categories')
+                        <svg class="w-[14px] h-[14px] transition-transform" :class="catOpen && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div
+                        x-show="catOpen"
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-1"
+                        class="absolute start-0 top-full mt-[8px] w-[220px] bg-white dark:bg-dark-card rounded-xl shadow-xl border border-slate-100 dark:border-dark-border overflow-hidden z-50 py-[8px]"
+                    >
+                        <a href="{{ route('phonix.products.index') }}" class="flex items-center gap-[10px] px-[16px] py-[10px] text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors">
+                            <svg class="w-[16px] h-[16px] shrink-0 text-phoenix-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                            </svg>
+                            @lang('phonix::app.listing.filters.all_categories')
+                        </a>
+                        <div class="border-t border-slate-100 dark:border-dark-border my-[4px]"></div>
+                        @foreach ($navCategories as $navCat)
+                            <a
+                                href="{{ route('phonix.categories.view', ['slug' => $navCat->slug]) }}"
+                                class="flex items-center gap-[10px] px-[16px] py-[9px] text-sm text-slate-600 dark:text-slate-400 hover:bg-phoenix-50 dark:hover:bg-dark-surface hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors"
+                                @click="catOpen = false"
+                            >
+                                <span class="w-[6px] h-[6px] rounded-full bg-phoenix-400 shrink-0"></span>
+                                {{ $navCat->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
                 <a
                     href="{{ route('phonix.products.index', ['sort' => 'price-asc']) }}"
                     class="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-phoenix-600 dark:hover:text-phoenix-400 transition-colors"
@@ -209,6 +250,61 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
                 </button>
+
+                {{-- Language Switcher (always visible) --}}
+                @php
+                    $allLocales = app(\Webkul\Core\Repositories\LocaleRepository::class)->all();
+                    $currentLocale = app()->getLocale();
+                @endphp
+                @if ($allLocales->count() > 1)
+                <div x-data="{ langOpen: false }" class="relative" @click.away="langOpen = false">
+                    <button
+                        @click="langOpen = !langOpen"
+                        class="flex items-center gap-[4px] p-[8px] text-slate-600 dark:text-slate-300 hover:text-phoenix-500 dark:hover:text-phoenix-400 transition-colors text-xs font-semibold uppercase"
+                        :aria-expanded="langOpen"
+                        aria-haspopup="true"
+                        aria-label="@lang('phonix::app.header.language.switch')"
+                    >
+                        <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                        </svg>
+                        <span class="hidden sm:inline">{{ strtoupper($currentLocale) }}</span>
+                        <svg class="w-[12px] h-[12px] transition-transform hidden sm:block" :class="langOpen && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div
+                        x-show="langOpen"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-1"
+                        class="absolute end-0 top-full mt-[4px] w-[150px] bg-white dark:bg-dark-card rounded-lg shadow-xl border border-slate-100 dark:border-dark-border overflow-hidden z-50"
+                        x-cloak
+                    >
+                        @foreach ($allLocales as $locale)
+                            <a
+                                href="{{ url()->current() }}?locale={{ $locale->code }}"
+                                class="flex items-center gap-[8px] px-[12px] py-[10px] text-sm transition-colors
+                                    {{ $locale->code === $currentLocale
+                                        ? 'bg-phoenix-50 dark:bg-dark-surface text-phoenix-600 dark:text-phoenix-400 font-semibold'
+                                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-surface' }}"
+                            >
+                                @if($locale->code === $currentLocale)
+                                    <svg class="w-[14px] h-[14px] text-phoenix-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                @else
+                                    <span class="w-[14px] h-[14px] shrink-0"></span>
+                                @endif
+                                {{ $locale->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
 
                 {{-- Dark Mode Toggle --}}
                 <button
