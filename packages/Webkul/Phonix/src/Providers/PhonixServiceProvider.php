@@ -34,6 +34,7 @@ class PhonixServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Webkul\Phonix\Console\Commands\SeedProducts::class,
+                \Webkul\Phonix\Console\UpdateProductsCommand::class,
             ]);
         }
     }
