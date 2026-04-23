@@ -55,12 +55,12 @@
 
                 if (res.ok && data.success) {
                     window.phonix?.updateCartBadge(data.items_qty ?? 0);
-                    window.phonix?.toast(data.message || @json(__('phonix::app.messages.success.added_to_cart')), 'success');
+                    window.phonix?.toast(data.message || {{ json_encode(__('phonix::app.messages.success.added_to_cart')) }}, 'success');
                 } else {
-                    window.phonix?.toast(data.error || data.message || @json(__('phonix::app.messages.error.general')), 'error');
+                    window.phonix?.toast(data.error || data.message || {{ json_encode(__('phonix::app.messages.error.general')) }}, 'error');
                 }
             } catch (e) {
-                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+                window.phonix?.toast({{ json_encode(__('phonix::app.messages.error.general')) }}, 'error');
             } finally {
                 this.cartLoading = false;
             }
@@ -79,8 +79,9 @@
                 const data = await res.json();
                 if (res.status === 401 && data.redirect) { window.location.href = data.redirect; return; }
                 if (data.success) { this.inWishlist = data.in_wishlist; }
-            } catch(e) {}
-            finally { this.wishlistLoading = false; }
+            } catch(e) {
+                window.phonix?.toast({{ json_encode(__('phonix::app.messages.error.general')) }}, 'error');
+            } finally { this.wishlistLoading = false; }
         }
     }"
     @mouseenter="hovered = true"

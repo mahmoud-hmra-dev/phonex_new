@@ -259,11 +259,11 @@
                         isConfigurable: {{ $isConfigurable ? 'true' : 'false' }},
                         hasRam: {{ $hasRamAttr ? 'true' : 'false' }},
                         hasStorage: {{ $hasStorageAttr ? 'true' : 'false' }},
-                        variants: @json($variantList ?? []),
+                        variants: {{ json_encode($variantList ?? []) }},
                         selectedRam: null,
                         selectedStorage: null,
                         selectedVariant: null,
-                        displayPrice: '{{ $hasSpecialPrice ? core()->currency($specialPrice) : core()->currency($product->price) }}',
+                        displayPrice: {{ json_encode($hasSpecialPrice ? core()->currency($specialPrice) : core()->currency($product->price)) }},
                         selectVariant() {
                             this.selectedVariant = this.variants.find(v =>
                                 (!this.hasRam || v.ram === this.selectedRam) &&
@@ -283,7 +283,7 @@
                             if (this.cartLoading || !this.canAddToCart) return;
                             this.cartLoading = true;
                             try {
-                                const res = await fetch('{{ route("phonix.cart.add") }}', {
+                                const res = await fetch('{{ route('phonix.cart.add') }}', {
                                     method: 'POST',
                                     credentials: 'same-origin',
                                     headers: {
@@ -303,12 +303,12 @@
                                 }
                                 if (res.ok && data.success) {
                                     window.phonix?.updateCartBadge(data.items_qty ?? 0);
-                                    window.phonix?.toast(data.message || @json(__('phonix::app.messages.success.added_to_cart')), 'success');
+                                    window.phonix?.toast(data.message || {{ json_encode(__('phonix::app.messages.success.added_to_cart')) }}, 'success');
                                 } else {
-                                    window.phonix?.toast(data.error || data.message || @json(__('phonix::app.messages.error.general')), 'error');
+                                    window.phonix?.toast(data.error || data.message || {{ json_encode(__('phonix::app.messages.error.general')) }}, 'error');
                                 }
                             } catch (e) {
-                                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+                                window.phonix?.toast({{ json_encode(__('phonix::app.messages.error.general')) }}, 'error');
                             } finally {
                                 this.cartLoading = false;
                             }
@@ -317,7 +317,7 @@
                             if (this.wishlistLoading) return;
                             this.wishlistLoading = true;
                             try {
-                                const res = await fetch('{{ route("phonix.wishlist.toggle") }}', {
+                                const res = await fetch('{{ route('phonix.wishlist.toggle') }}', {
                                     method: 'POST',
                                     credentials: 'same-origin',
                                     headers: {
@@ -335,11 +335,11 @@
                                 if (data.success) {
                                     this.inWishlist = data.in_wishlist;
                                     window.phonix?.toast(data.in_wishlist
-                                        ? @json(__('phonix::app.messages.success.added_to_wishlist'))
-                                        : @json(__('phonix::app.messages.success.removed_from_wishlist')), 'success');
+                                        ? {{ json_encode(__('phonix::app.messages.success.added_to_wishlist')) }}
+                                        : {{ json_encode(__('phonix::app.messages.success.removed_from_wishlist')) }}, 'success');
                                 }
                             } catch (e) {
-                                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+                                window.phonix?.toast({{ json_encode(__('phonix::app.messages.error.general')) }}, 'error');
                             } finally {
                                 this.wishlistLoading = false;
                             }
