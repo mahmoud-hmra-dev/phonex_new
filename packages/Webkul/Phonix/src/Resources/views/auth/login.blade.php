@@ -11,7 +11,7 @@
             {{-- Logo --}}
             <div class="text-center mb-[32px]">
                 <a href="{{ route('phonix.home') }}" class="inline-block" aria-label="@lang('phonix::app.theme.name')">
-                    <span class="text-fluid-2xl font-bold text-gradient-phoenix">Phonix</span>
+                    <img src="{{ asset('phonix-logo.png') }}" alt="Phonix" class="h-[52px] w-auto mx-auto">
                 </a>
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-[8px]">
                     @lang('phonix::app.theme.title')

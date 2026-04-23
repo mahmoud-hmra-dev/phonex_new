@@ -100,16 +100,7 @@
 
         {{-- Splash Screen --}}
         <div id="phonix-splash">
-            <div style="display:flex;align-items:center;gap:12px;">
-                <span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 8px 20px -4px rgba(79,70,229,0.5);">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.25">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l-6 9h5l-3 9 10-12h-6l3-6z"/>
-                    </svg>
-                </span>
-                <span style="font-family:'Inter',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.5px;color:#0f172a;">
-                    phonix<span style="color:#4f46e5;">.</span>
-                </span>
-            </div>
+            <img src="{{ asset('phonix-logo.png') }}" alt="Phonix" style="width:200px;height:auto;">
         </div>
 
         <script>

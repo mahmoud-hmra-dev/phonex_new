@@ -37,15 +37,8 @@
 >
     {{-- Drawer Header --}}
     <div class="flex items-center justify-between p-[16px] border-b border-slate-100 dark:border-dark-border">
-        <a href="{{ route('phonix.home') }}" class="flex items-center gap-[10px] shrink-0" @click="mobileMenuOpen = false" aria-label="@lang('phonix::app.theme.name')">
-            <span class="inline-flex items-center justify-center w-[34px] h-[34px] rounded-xl gradient-phoenix shadow-[0_6px_16px_-4px_rgba(79,70,229,0.5)]">
-                <svg class="w-[18px] h-[18px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l-6 9h5l-3 9 10-12h-6l3-6z"/>
-                </svg>
-            </span>
-            <span class="font-display text-[18px] font-bold tracking-tight text-slate-900 dark:text-white">
-                phonix<span class="text-phoenix-500 dark:text-phoenix-400">.</span>
-            </span>
+        <a href="{{ route('phonix.home') }}" class="flex items-center shrink-0" @click="mobileMenuOpen = false" aria-label="@lang('phonix::app.theme.name')">
+            <img src="{{ asset('phonix-logo.png') }}" alt="Phonix" class="h-[60px] w-auto">
         </a>
         <button
             @click="mobileMenuOpen = false"

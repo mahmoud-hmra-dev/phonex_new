@@ -58,13 +58,8 @@
 
                 {{-- Brand & Description --}}
                 <div class="col-span-2 lg:col-span-4">
-                    <a href="{{ route('phonix.home') }}" class="inline-flex items-center gap-[10px] mb-[20px]" aria-label="@lang('phonix::app.theme.name')">
-                        <span class="inline-flex items-center justify-center w-[42px] h-[42px] rounded-xl gradient-phoenix shadow-[0_6px_20px_-4px_rgba(79,70,229,0.5)]">
-                            <svg class="w-[22px] h-[22px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3l-6 9h5l-3 9 10-12h-6l3-6z"/></svg>
-                        </span>
-                        <span class="font-display text-[26px] font-bold tracking-tight text-white">
-                            phonix<span class="text-phoenix-400">.</span>
-                        </span>
+                    <a href="{{ route('phonix.home') }}" class="inline-flex mb-[20px]" aria-label="@lang('phonix::app.theme.name')">
+                        <img src="{{ asset('phonix-logo.png') }}" alt="Phonix" class="h-[44px] w-auto">
                     </a>
 
                     <p class="text-sm text-slate-400 leading-relaxed mb-[24px] max-w-[420px]">

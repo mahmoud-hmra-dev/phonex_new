@@ -115,15 +115,8 @@
             </button>
 
             {{-- Logo --}}
-            <a href="{{ route('phonix.home') }}" class="flex items-center gap-[10px] shrink-0" aria-label="@lang('phonix::app.theme.name')">
-                <span class="relative inline-flex items-center justify-center w-[38px] h-[38px] rounded-xl gradient-phoenix shadow-[0_6px_16px_-4px_rgba(79,70,229,0.5)]">
-                    <svg class="w-[22px] h-[22px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l-6 9h5l-3 9 10-12h-6l3-6z"/>
-                    </svg>
-                </span>
-                <span class="font-display text-[22px] font-bold tracking-tight text-slate-900 dark:text-white">
-                    phonix<span class="text-phoenix-500 dark:text-phoenix-400">.</span>
-                </span>
+            <a href="{{ route('phonix.home') }}" class="flex items-center shrink-0" aria-label="@lang('phonix::app.theme.name')">
+                <img src="{{ asset('phonix-logo.png') }}" alt="Phonix" class="h-[80px] w-auto">
             </a>
 
             {{-- Search Bar (Desktop) --}}
