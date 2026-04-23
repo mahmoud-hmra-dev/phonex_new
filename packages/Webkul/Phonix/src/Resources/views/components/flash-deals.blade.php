@@ -1,54 +1,46 @@
 @props(['products' => collect()])
 
-{{-- Flash Deals Section --}}
-<section class="section-padding bg-slate-50 dark:bg-dark-surface" data-gsap="fade-up">
-    <div class="container">
-        {{-- Header with badge and countdown --}}
-        <div class="flex flex-col md:flex-row items-center justify-between gap-[16px] mb-[32px] lg:mb-[48px]">
-            <div class="text-center md:text-start">
-                <div class="flex items-center justify-center md:justify-start gap-[12px] mb-[8px]">
-                    <h2 class="text-fluid-2xl font-bold text-slate-900 dark:text-white">
-                        @lang('phonix::app.deals.flash_deal')
-                    </h2>
-                    <x-phonix::badge type="hot">@lang('phonix::app.product.hot')</x-phonix::badge>
-                </div>
-                <div class="flex items-center justify-center gap-[8px]">
-                    <span class="w-[32px] h-[2px] bg-phoenix-300 dark:bg-phoenix-600 rounded-full"></span>
-                    <span class="w-[48px] h-[3px] bg-phoenix-500 rounded-full"></span>
-                    <span class="w-[32px] h-[2px] bg-phoenix-300 dark:bg-phoenix-600 rounded-full"></span>
-                </div>
+{{-- Flash Deals — urgency section with countdown --}}
+<section class="section-padding relative overflow-hidden" data-gsap="fade-up">
+    {{-- Ambient background --}}
+    <div class="absolute inset-0 -z-10 bg-gradient-to-br from-plasma-50 via-white to-phoenix-50 dark:from-plasma-900/20 dark:via-dark-bg dark:to-phoenix-900/10"></div>
+    <div class="absolute top-[-80px] end-[-80px] w-[360px] h-[360px] rounded-full bg-plasma-500/10 blur-3xl pointer-events-none"></div>
+
+    <div class="container relative">
+        <div class="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-[24px] mb-[40px]">
+            <div class="text-center lg:text-start">
+                <p class="inline-flex items-center gap-[8px] mb-[12px] px-[12px] py-[6px] rounded-full bg-plasma-500/10 text-plasma-600 dark:text-plasma-400 text-[11px] font-bold uppercase tracking-[0.2em]">
+                    <svg class="w-[12px] h-[12px] animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    @lang('phonix::app.deals.hurry')
+                </p>
+                <h2 class="font-display text-fluid-2xl md:text-fluid-3xl font-bold text-slate-900 dark:text-white leading-tight mb-[6px]">
+                    @lang('phonix::app.deals.flash_deal')
+                </h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-[420px]">
+                    @lang('phonix::app.deal_of_day.subtitle')
+                </p>
             </div>
 
-            {{-- Countdown Timer --}}
-            <div
-                x-data="countdownTimer()"
-                x-init="startCountdown()"
-                class="flex items-center gap-[8px] md:gap-[12px]"
-            >
-                <span class="text-sm font-medium text-slate-500 dark:text-slate-400 me-[4px]">
-                    @lang('phonix::app.deals.ends_in'):
+            {{-- Countdown --}}
+            <div x-data="countdownTimer()" x-init="startCountdown()" class="flex items-center gap-[6px] md:gap-[10px]">
+                <span class="hidden sm:inline text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 me-[8px]">
+                    @lang('phonix::app.deals.ends_in')
                 </span>
                 <template x-for="(unit, index) in units" :key="index">
-                    <div class="flex items-center gap-[8px] md:gap-[12px]">
+                    <div class="flex items-center gap-[4px] md:gap-[8px]">
                         <div class="flex flex-col items-center">
-                            <span
-                                class="flex items-center justify-center w-[44px] h-[44px] md:w-[52px] md:h-[52px] rounded-md bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border text-lg md:text-xl font-bold text-phoenix-600 dark:text-phoenix-400 shadow-sm"
-                                x-text="String(unit.value).padStart(2, '0')"
-                            ></span>
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-[4px] uppercase tracking-wider" x-text="unit.label"></span>
+                            <span class="flex items-center justify-center w-[46px] h-[46px] md:w-[54px] md:h-[54px] rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-display text-lg md:text-xl font-bold shadow-[0_6px_16px_-4px_rgba(15,23,42,0.25)]" x-text="String(unit.value).padStart(2, '0')"></span>
+                            <span class="text-[9px] text-slate-500 dark:text-slate-400 mt-[4px] uppercase tracking-wider font-semibold" x-text="unit.label"></span>
                         </div>
-                        <span
-                            x-show="index < units.length - 1"
-                            class="text-lg font-bold text-slate-300 dark:text-slate-600 -mt-[16px]"
-                        >:</span>
+                        <span x-show="index < units.length - 1" class="text-lg font-bold text-plasma-500 -mt-[16px]">:</span>
                     </div>
                 </template>
             </div>
         </div>
 
-        {{-- Products horizontal scroll --}}
-        <div class="relative overflow-hidden">
-            <div class="flex gap-[16px] md:gap-[24px] overflow-x-auto scrollbar-thin pb-[16px] snap-x snap-mandatory">
+        {{-- Products --}}
+        <div class="relative">
+            <div class="flex gap-[14px] md:gap-[20px] overflow-x-auto scrollbar-thin pb-[8px] snap-x snap-mandatory -mx-[16px] px-[16px] md:mx-0 md:px-0">
                 @foreach ($products as $product)
                     @php
                         $productImage = product_image()->getProductBaseImage($product);
@@ -72,16 +64,12 @@
             </div>
         </div>
 
-        {{-- View All link --}}
-        <div class="text-center mt-[24px]">
-            <a
-                href="{{ route('phonix.products.index', ['sort' => 'price-asc']) }}"
-                class="inline-flex items-center gap-[6px] text-sm font-semibold text-phoenix-600 dark:text-phoenix-400 hover:text-phoenix-700 dark:hover:text-phoenix-300 transition-colors"
-            >
+        <div class="text-center mt-[28px]">
+            <a href="{{ route('phonix.products.index', ['sort' => 'price-asc']) }}" class="inline-flex items-center gap-[8px] text-sm font-semibold text-plasma-600 dark:text-plasma-400 hover:text-plasma-700 dark:hover:text-plasma-300 transition-colors group">
                 @lang('phonix::app.deals.view_all_deals')
-                <svg class="w-[16px] h-[16px] rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
+                <span class="inline-flex items-center justify-center w-[28px] h-[28px] rounded-full border border-plasma-500/30 group-hover:border-plasma-500 group-hover:bg-plasma-500 group-hover:text-white transition-all">
+                    <svg class="w-[12px] h-[12px] rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                </span>
             </a>
         </div>
     </div>
@@ -105,12 +93,7 @@
                 const update = () => {
                     const now = new Date().getTime();
                     const distance = endDate.getTime() - now;
-
-                    if (distance < 0) {
-                        this.units.forEach(u => u.value = 0);
-                        return;
-                    }
-
+                    if (distance < 0) { this.units.forEach(u => u.value = 0); return; }
                     this.units[0].value = Math.floor(distance / (1000 * 60 * 60 * 24));
                     this.units[1].value = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     this.units[2].value = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));

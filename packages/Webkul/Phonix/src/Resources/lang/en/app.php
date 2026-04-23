@@ -122,6 +122,7 @@ return [
         'cables'            => 'Cables',
         'power_banks'       => 'Power Banks',
         'view_all'          => 'View All Categories',
+        'featured'          => 'Featured',
     ],
 
     'product' => [
@@ -175,6 +176,7 @@ return [
         'select_color'         => 'Select Color',
         'select_storage'       => 'Select Storage',
         'select_size'          => 'Select Size',
+        'search_by_image'      => 'Search by Image',
     ],
 
     'listing' => [

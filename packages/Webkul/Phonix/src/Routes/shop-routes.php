@@ -17,9 +17,8 @@ Route::group(['prefix' => 'phonix'], function () {
         return view('phonix::home');
     })->name('phonix.home');
 
-    Route::get('/products', function () {
-        return view('phonix::products.index');
-    })->name('phonix.products.index');
+    Route::get('/products', [\Webkul\Phonix\Http\Controllers\Shop\ProductListingController::class, 'index'])
+        ->name('phonix.products.index');
 
     Route::get('/products/{slug}', function ($slug) {
         $product = app(\Webkul\Product\Repositories\ProductRepository::class)
@@ -31,17 +30,6 @@ Route::group(['prefix' => 'phonix'], function () {
 
         return view('phonix::products.view', compact('product'));
     })->name('phonix.products.view');
-
-    Route::get('/category/{slug}', function ($slug) {
-        $category = app(\Webkul\Category\Repositories\CategoryRepository::class)
-            ->findBySlug($slug);
-
-        if (! $category) {
-            abort(404);
-        }
-
-        return view('phonix::categories.view', compact('category'));
-    })->name('phonix.categories.view');
 
     Route::get('/compare', function () {
         $ids = array_filter(

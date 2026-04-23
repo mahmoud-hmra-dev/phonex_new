@@ -54,11 +54,13 @@
 <section class="section-padding" data-gsap="fade-up">
     <div class="container">
         <x-phonix::section-heading
+            eyebrow="{{ __('phonix::app.deals.limited_offer') }}"
             :title="__('phonix::app.deal_of_day.title')"
             :subtitle="__('phonix::app.deal_of_day.subtitle')"
+            align="start"
         />
 
-        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-phoenix-950 via-phoenix-900 to-dark-bg border border-phoenix-800/30">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-phoenix-950 via-phoenix-900 to-slate-950 border border-phoenix-800/40 shadow-[0_32px_64px_-20px_rgba(15,12,41,0.5)]">
             {{-- Background decorations --}}
             <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
                 <div class="absolute -top-[100px] -end-[100px] w-[300px] h-[300px] rounded-full bg-phoenix-500/10 blur-3xl"></div>
@@ -89,7 +91,7 @@
                         </div>
                         {{-- Discount badge --}}
                         @if ($dealDiscount > 0)
-                            <div class="absolute -top-[8px] -end-[8px] flex items-center justify-center w-[64px] h-[64px] md:w-[72px] md:h-[72px] rounded-full bg-coral text-white font-bold text-sm md:text-base shadow-lg animate-pulse-glow" style="box-shadow: 0 0 20px rgba(255,107,107,0.4);">
+                            <div class="absolute -top-[8px] -end-[8px] flex items-center justify-center w-[68px] h-[68px] md:w-[76px] md:h-[76px] rounded-full gradient-plasma text-white font-display font-bold text-base md:text-lg shadow-[0_0_32px_rgba(255,71,87,0.5)]">
                                 -{{ $dealDiscount }}%
                             </div>
                         @endif

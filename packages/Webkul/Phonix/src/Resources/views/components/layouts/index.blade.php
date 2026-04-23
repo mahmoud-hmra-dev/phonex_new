@@ -1,4 +1,5 @@
 @props([
+    'title'     => null,
     'hasHeader' => true,
     'hasFooter' => true,
 ])

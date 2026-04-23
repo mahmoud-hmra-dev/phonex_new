@@ -16,6 +16,8 @@ class PhonixServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerConfig();
+
+        require_once __DIR__.'/../helpers.php';
     }
 
     /**
@@ -35,6 +37,9 @@ class PhonixServiceProvider extends ServiceProvider
             $this->commands([
                 \Webkul\Phonix\Console\Commands\SeedProducts::class,
                 \Webkul\Phonix\Console\UpdateProductsCommand::class,
+                \Webkul\Phonix\Console\Commands\RefreshProductImages::class,
+                \Webkul\Phonix\Console\Commands\FetchProductImages::class,
+                \Webkul\Phonix\Console\Commands\AssignProductImage::class,
             ]);
         }
     }

@@ -69,6 +69,75 @@
     } elseif ($product->new) {
         $badge = 'new';
     }
+
+    // Configurable product variant data
+    $isConfigurable = $product->type === 'configurable';
+    $variantList    = [];
+    $hasRamAttr     = false;
+    $hasStorageAttr = false;
+
+    if ($isConfigurable) {
+        $ramAttr     = DB::table('attributes')->where('code', 'ram')->first();
+        $storageAttr = DB::table('attributes')->where('code', 'storage')->first();
+
+        $superAttrIds = DB::table('product_super_attributes')
+            ->where('product_id', $product->id)
+            ->pluck('attribute_id');
+
+        $hasRamAttr     = $ramAttr && $superAttrIds->contains($ramAttr->id);
+        $hasStorageAttr = $storageAttr && $superAttrIds->contains($storageAttr->id);
+
+        $childProducts = DB::table('products')
+            ->where('parent_id', $product->id)
+            ->orderBy('id')
+            ->get();
+
+        foreach ($childProducts as $child) {
+            $priceVal = DB::table('product_attribute_values')
+                ->where('product_id', $child->id)
+                ->where('attribute_id', 11)
+                ->value('float_value') ?? 0;
+
+            $ramLabel     = null;
+            $storageLabel = null;
+
+            if ($hasRamAttr) {
+                $ramOptId = DB::table('product_attribute_values')
+                    ->where('product_id', $child->id)
+                    ->where('attribute_id', $ramAttr->id)
+                    ->value('integer_value');
+                if ($ramOptId) {
+                    $ramLabel = DB::table('attribute_option_translations')
+                        ->where('attribute_option_id', $ramOptId)
+                        ->value('label');
+                }
+            }
+
+            if ($hasStorageAttr) {
+                $storOptId = DB::table('product_attribute_values')
+                    ->where('product_id', $child->id)
+                    ->where('attribute_id', $storageAttr->id)
+                    ->value('integer_value');
+                if ($storOptId) {
+                    $storageLabel = DB::table('attribute_option_translations')
+                        ->where('attribute_option_id', $storOptId)
+                        ->value('label');
+                }
+            }
+
+            $variantList[] = [
+                'id'             => $child->id,
+                'price'          => $priceVal,
+                'priceFormatted' => core()->currency($priceVal),
+                'ram'            => $ramLabel,
+                'storage'        => $storageLabel,
+            ];
+        }
+
+        // Unique option sets for chip rendering
+        $ramOptions     = collect($variantList)->pluck('ram')->filter()->unique()->values()->toArray();
+        $storageOptions = collect($variantList)->pluck('storage')->filter()->unique()->values()->toArray();
+    }
 @endphp
 
 @push('meta')
@@ -97,7 +166,7 @@
         <x-phonix::breadcrumb :items="array_filter([
             ['label' => __('phonix::app.general.home'), 'url' => route('phonix.home')],
             ['label' => __('phonix::app.general.shop'), 'url' => route('phonix.products.index')],
-            $productCategory ? ['label' => $productCategory->name, 'url' => route('phonix.categories.view', $productCategory->slug)] : null,
+            $productCategory ? ['label' => $productCategory->name, 'url' => route('phonix.products.index', ['category_ids' => [$productCategory->id]])] : null,
             ['label' => $product->name],
         ])" />
 
@@ -145,9 +214,14 @@
                     </div>
                 @endif
 
-                {{-- Price --}}
+                {{-- Price (reactive for configurable products) --}}
                 <div class="flex items-center gap-[12px] mb-[16px]">
-                    @if($hasSpecialPrice)
+                    @if($isConfigurable)
+                        <span
+                            x-text="displayPrice"
+                            class="text-fluid-lg font-bold text-phoenix-600 dark:text-phoenix-400"
+                        ></span>
+                    @elseif($hasSpecialPrice)
                         <span class="text-fluid-lg font-bold text-phoenix-600 dark:text-phoenix-400">
                             {{ core()->currency($specialPrice) }}
                         </span>
@@ -182,8 +256,31 @@
                         cartLoading: false,
                         wishlistLoading: false,
                         inWishlist: false,
+                        isConfigurable: {{ $isConfigurable ? 'true' : 'false' }},
+                        hasRam: {{ $hasRamAttr ? 'true' : 'false' }},
+                        hasStorage: {{ $hasStorageAttr ? 'true' : 'false' }},
+                        variants: @json($variantList ?? []),
+                        selectedRam: null,
+                        selectedStorage: null,
+                        selectedVariant: null,
+                        displayPrice: '{{ $hasSpecialPrice ? core()->currency($specialPrice) : core()->currency($product->price) }}',
+                        selectVariant() {
+                            this.selectedVariant = this.variants.find(v =>
+                                (!this.hasRam || v.ram === this.selectedRam) &&
+                                (!this.hasStorage || v.storage === this.selectedStorage)
+                            ) ?? null;
+                            if (this.selectedVariant) {
+                                this.displayPrice = this.selectedVariant.priceFormatted;
+                            }
+                        },
+                        get computedProductId() {
+                            return this.selectedVariant ? this.selectedVariant.id : {{ $product->id }};
+                        },
+                        get canAddToCart() {
+                            return !this.isConfigurable || this.selectedVariant !== null;
+                        },
                         async addToCart() {
-                            if (this.cartLoading) return;
+                            if (this.cartLoading || !this.canAddToCart) return;
                             this.cartLoading = true;
                             try {
                                 const res = await fetch('/api/checkout/cart', {
@@ -193,7 +290,7 @@
                                         'Accept': 'application/json',
                                         'X-CSRF-TOKEN': this.csrfToken
                                     },
-                                    body: JSON.stringify({ product_id: {{ $product->id }}, quantity: this.quantity })
+                                    body: JSON.stringify({ product_id: this.computedProductId, quantity: this.quantity })
                                 });
                                 if (res.ok) {
                                     window.location.href = '{{ route("phonix.cart.index") }}';
@@ -228,6 +325,61 @@
                         }
                     }"
                 >
+                    {{-- Variant Selector (configurable products) --}}
+                    @if($isConfigurable)
+                        <div class="mb-[20px] space-y-[14px]">
+
+                            @if($hasRamAttr && count($ramOptions ?? []) > 0)
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-[8px]">
+                                    RAM
+                                    <span x-show="selectedRam" x-text="'— ' + selectedRam" class="text-phoenix-500 font-normal"></span>
+                                </label>
+                                <div class="flex flex-wrap gap-[8px]">
+                                    @foreach($ramOptions as $opt)
+                                    <button
+                                        type="button"
+                                        @click="selectedRam = '{{ $opt }}'; selectVariant()"
+                                        :class="selectedRam === '{{ $opt }}'
+                                            ? 'bg-phoenix-500 text-white border-phoenix-500 shadow-md'
+                                            : 'bg-white dark:bg-dark-card text-slate-700 dark:text-slate-300 border-slate-200 dark:border-dark-border hover:border-phoenix-400'"
+                                        class="px-[16px] py-[7px] rounded-lg border-2 text-sm font-semibold transition-all duration-150"
+                                    >{{ $opt }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+
+                            @if($hasStorageAttr && count($storageOptions ?? []) > 0)
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-[8px]">
+                                    @lang('phonix::app.product.storage')
+                                    <span x-show="selectedStorage" x-text="'— ' + selectedStorage" class="text-phoenix-500 font-normal"></span>
+                                </label>
+                                <div class="flex flex-wrap gap-[8px]">
+                                    @foreach($storageOptions as $opt)
+                                    <button
+                                        type="button"
+                                        @click="selectedStorage = '{{ $opt }}'; selectVariant()"
+                                        :class="selectedStorage === '{{ $opt }}'
+                                            ? 'bg-phoenix-500 text-white border-phoenix-500 shadow-md'
+                                            : 'bg-white dark:bg-dark-card text-slate-700 dark:text-slate-300 border-slate-200 dark:border-dark-border hover:border-phoenix-400'"
+                                        class="px-[16px] py-[7px] rounded-lg border-2 text-sm font-semibold transition-all duration-150"
+                                    >{{ $opt }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+
+                            <p x-show="isConfigurable && !selectedVariant" class="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-[6px]">
+                                <svg class="w-[14px] h-[14px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                </svg>
+                                @lang('phonix::app.product.select_variant')
+                            </p>
+                        </div>
+                    @endif
+
                     {{-- Stock Status --}}
                     <div class="flex items-center gap-[6px] mb-[20px]">
                         @if ($product->haveSufficientQuantity(1))
@@ -284,9 +436,9 @@
 
                     {{-- Action Buttons --}}
                     <div class="flex flex-col sm:flex-row gap-[12px] mb-[24px]">
-                        <button class="btn-phoenix flex-1 px-[24px] py-[14px] text-sm flex items-center justify-center gap-[8px]"
+                        <button class="btn-phoenix flex-1 px-[24px] py-[14px] text-sm flex items-center justify-center gap-[8px] disabled:opacity-50 disabled:cursor-not-allowed"
                             @click="addToCart()"
-                            :disabled="cartLoading"
+                            :disabled="cartLoading || !canAddToCart"
                         >
                             <template x-if="cartLoading">
                                 <svg class="w-[18px] h-[18px] animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>

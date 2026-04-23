@@ -36,13 +36,13 @@
         {{ core()->getCurrentChannel()->home_seo['meta_title'] ?? __('phonix::app.theme.title') }}
     </x-slot>
 
-    {{-- Hero Section --}}
-    <x-phonix::hero />
+    {{-- Hero --}}
+    <x-phonix::hero :categories="$allCategories" />
 
-    {{-- Features / Trust Badges --}}
+    {{-- Trust strip — overlaps hero bottom --}}
     <x-phonix::features-bar />
 
-    {{-- Categories Grid --}}
+    {{-- Shop by Category --}}
     @if($allCategories->count())
         <x-phonix::categories-grid :categories="$allCategories" />
     @endif
@@ -64,19 +64,16 @@
         />
     @endif
 
-    {{-- Brand Carousel --}}
-    <x-phonix::brands-carousel />
-
     {{-- Deal of the Day --}}
     <x-phonix::deal-of-day />
 
-    {{-- Stats Counter --}}
+    {{-- Brands --}}
+    <x-phonix::brands-carousel />
+
+    {{-- Social proof --}}
     <x-phonix::stats-counter />
 
     {{-- Testimonials --}}
     <x-phonix::testimonials />
-
-    {{-- Newsletter --}}
-    <x-phonix::newsletter />
 
 </x-phonix::layouts.index>

@@ -122,6 +122,7 @@ return [
         'cables'            => 'كابلات',
         'power_banks'       => 'بطاريات متنقلة',
         'view_all'          => 'عرض جميع التصنيفات',
+        'featured'          => 'مميز',
     ],
 
     'product' => [
@@ -175,6 +176,7 @@ return [
         'select_color'         => 'اختر اللون',
         'select_storage'       => 'اختر سعة التخزين',
         'select_size'          => 'اختر الحجم',
+        'search_by_image'      => 'البحث بالصورة',
     ],
 
     'listing' => [

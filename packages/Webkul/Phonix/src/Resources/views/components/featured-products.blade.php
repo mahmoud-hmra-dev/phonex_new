@@ -7,22 +7,33 @@
 {{-- Featured Products with Tabs --}}
 <section class="section-padding" data-gsap="fade-up">
     <div class="container">
-        <x-phonix::section-heading :title="__('phonix::app.featured.title')" />
 
         <div x-data="{ activeTab: 'bestsellers' }">
-            {{-- Tab Navigation --}}
-            <div class="flex items-center justify-center gap-[4px] mb-[32px] lg:mb-[48px]">
-                @foreach (['bestsellers', 'new_arrivals', 'trending'] as $tab)
-                    <button
-                        @click="activeTab = '{{ $tab }}'"
-                        :class="activeTab === '{{ $tab }}'
-                            ? 'bg-phoenix-500 text-white shadow-md dark:bg-phoenix-400 dark:text-phoenix-950'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-card'"
-                        class="px-[20px] py-[10px] rounded-md text-sm font-semibold transition-all duration-200 ease-phoenix"
-                    >
-                        @lang('phonix::app.featured.' . $tab)
-                    </button>
-                @endforeach
+            {{-- Heading + Tab Nav --}}
+            <div class="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-[24px] mb-[36px] lg:mb-[48px]">
+                <div class="text-center lg:text-start">
+                    <p class="inline-flex items-center gap-[8px] mb-[10px] text-[11px] font-bold tracking-[0.2em] uppercase text-phoenix-600 dark:text-phoenix-400">
+                        <span class="inline-block w-[20px] h-[2px] rounded-full bg-phoenix-500"></span>
+                        @lang('phonix::app.featured.title')
+                    </p>
+                    <h2 class="font-display text-fluid-2xl md:text-fluid-3xl font-bold text-slate-900 dark:text-white leading-[1.1] tracking-tight">
+                        Handpicked for you
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-[6px] p-[4px] rounded-full bg-slate-100 dark:bg-dark-surface">
+                    @foreach (['bestsellers', 'new_arrivals', 'trending'] as $tab)
+                        <button
+                            @click="activeTab = '{{ $tab }}'"
+                            :class="activeTab === '{{ $tab }}'
+                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-[18px] py-[9px] rounded-full text-[13px] font-semibold transition-all duration-200 ease-phoenix"
+                        >
+                            @lang('phonix::app.featured.' . $tab)
+                        </button>
+                    @endforeach
+                </div>
             </div>
 
             @php
@@ -33,16 +44,14 @@
                 ];
             @endphp
 
-            {{-- Tab Panels --}}
             @foreach ($tabProducts as $tabKey => $products)
                 <div
-                    x-show="activeTab === '{{ $tabKey }}'"
+                    x-show="activeTab === '{{ $tabKey }}'" x-cloak
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-[8px]"
                     x-transition:enter-end="opacity-100 translate-y-0"
-                    x-cloak
                 >
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[16px] md:gap-[24px]" data-gsap="stagger">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-[12px] md:gap-[20px]" data-gsap="stagger">
                         @foreach ($products as $product)
                             @php
                                 $productImage = product_image()->getProductBaseImage($product);
@@ -64,7 +73,7 @@
                     </div>
 
                     @if($products->isEmpty())
-                        <p class="text-center py-[32px] text-slate-500 dark:text-slate-400">
+                        <p class="text-center py-[48px] text-slate-500 dark:text-slate-400">
                             @lang('phonix::app.general.no_products')
                         </p>
                     @endif
