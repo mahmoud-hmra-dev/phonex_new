@@ -21,7 +21,7 @@
         >
         <meta
             name="viewport"
-            content="width=device-width, initial-scale=1.0"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         >
         <meta
             name="csrf-token"
@@ -75,9 +75,49 @@
         <style>
             {!! core()->getConfigData('general.content.custom_scripts.custom_css') !!}
         </style>
+
+        <style>
+            @keyframes phonix-splash-hide {
+                0%   { opacity: 1; }
+                80%  { opacity: 1; }
+                100% { opacity: 0; }
+            }
+            #phonix-splash {
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                z-index: 999999;
+                background: #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: phonix-splash-hide 3.5s ease forwards;
+            }
+        </style>
     </head>
 
     <body class="font-inter antialiased bg-white text-slate-800 dark:bg-dark-bg dark:text-slate-200 transition-colors duration-300">
+
+        {{-- Splash Screen --}}
+        <div id="phonix-splash">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 8px 20px -4px rgba(79,70,229,0.5);">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.25">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 3l-6 9h5l-3 9 10-12h-6l3-6z"/>
+                    </svg>
+                </span>
+                <span style="font-family:'Inter',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.5px;color:#0f172a;">
+                    phonix<span style="color:#4f46e5;">.</span>
+                </span>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('phonix-splash').addEventListener('animationend', function () {
+                this.style.display = 'none';
+            });
+        </script>
+
         {{-- Skip to content --}}
         <a
             href="#main"

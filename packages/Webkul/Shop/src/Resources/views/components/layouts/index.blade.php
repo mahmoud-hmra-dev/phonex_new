@@ -82,6 +82,26 @@
             {!! core()->getConfigData('general.content.custom_scripts.custom_css') !!}
         </style>
 
+        <style>
+            #phonix-splash {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                width: 100%; height: 100%;
+                z-index: 99999;
+                background: #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 1;
+            }
+            #phonix-splash.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+        </style>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
         @if(core()->getConfigData('general.content.speculation_rules.enabled'))
             <script type="speculationrules">
                 @json(core()->getSpeculationRules(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
@@ -96,8 +116,8 @@
         {!! view_render_event('bagisto.shop.layout.body.before') !!}
 
         <!-- Splash Screen -->
-        <div id="phonix-splash" style="position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s ease;">
-            <svg width="160" height="36" viewBox="0 0 131 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div id="phonix-splash">
+            <svg width="220" height="48" viewBox="0 0 131 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20.5 3H9L15 12L20.5 3Z" fill="#FBC256"/>
                 <path d="M10 10H1L14.5 29L33 0H25.5L14.5 17.5L10 10Z" fill="#FBC256"/>
                 <path d="M20.5 3H9L15 12L20.5 3Z" fill="#4D7EA8"/>
@@ -113,16 +133,22 @@
             </svg>
         </div>
         <script>
-            window.addEventListener('load', function () {
+            setTimeout(function () {
                 var splash = document.getElementById('phonix-splash');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(function () { splash.style.display = 'none'; }, 400);
-                }
-            });
+                if (!splash) return;
+                anime({
+                    targets: splash,
+                    opacity: [1, 0],
+                    duration: 600,
+                    easing: 'easeInOutQuad',
+                    complete: function () {
+                        splash.style.display = 'none';
+                    }
+                });
+            }, 3000);
         </script>
 
-        <
+        <a
             href="#main"
             class="skip-to-main-content-link"
         >
