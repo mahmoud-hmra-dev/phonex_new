@@ -31,20 +31,39 @@
         productId: {{ $productId ?? 'null' }},
         csrfToken: document.querySelector('meta[name=csrf-token]')?.content ?? '',
 
-        addToCart() {
-            if (!this.productId) { window.location.href = {{ json_encode($url) }}; return; }
+        async addToCart() {
+            if (!this.productId) { window.Turbo ? window.Turbo.visit({{ json_encode($url) }}) : (window.location.href = {{ json_encode($url) }}); return; }
             this.cartLoading = true;
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{{ route('phonix.cart.add') }}';
-            form.style.display = 'none';
-            form.innerHTML = `
-                <input type='hidden' name='_token'     value='${this.csrfToken}'>
-                <input type='hidden' name='product_id' value='${this.productId}'>
-                <input type='hidden' name='quantity'   value='1'>
-            `;
-            document.body.appendChild(form);
-            form.submit();
+            try {
+                const res = await fetch('{{ route('phonix.cart.add') }}', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                    },
+                    body: JSON.stringify({ product_id: this.productId, quantity: 1 }),
+                });
+                const data = await res.json().catch(() => ({}));
+
+                // Configurable product needs its options page.
+                if (data.redirect && !data.success) {
+                    window.Turbo ? window.Turbo.visit(data.redirect) : (window.location.href = data.redirect);
+                    return;
+                }
+
+                if (res.ok && data.success) {
+                    window.phonix?.updateCartBadge(data.items_qty ?? 0);
+                    window.phonix?.toast(data.message || @json(__('phonix::app.messages.success.added_to_cart')), 'success');
+                } else {
+                    window.phonix?.toast(data.error || data.message || @json(__('phonix::app.messages.error.general')), 'error');
+                }
+            } catch (e) {
+                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+            } finally {
+                this.cartLoading = false;
+            }
         },
 
         async toggleWishlist() {

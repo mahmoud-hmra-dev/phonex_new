@@ -121,7 +121,7 @@
                                         </svg>
                                         @lang('phonix::app.account.sidebar.logout')
                                     </a>
-                                    <form id="logout-form" action="{{ route('shop.customer.session.destroy') }}" method="POST" class="hidden">
+                                    <form id="logout-form" action="{{ route('shop.customer.session.destroy') }}" method="POST" data-turbo="false" class="hidden">
                                         @csrf
                                         @method('DELETE')
                                     </form>

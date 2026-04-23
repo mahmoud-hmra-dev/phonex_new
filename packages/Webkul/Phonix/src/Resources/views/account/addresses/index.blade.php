@@ -62,6 +62,7 @@
                     : '{{ route('phonix.account.addresses.store') }}';
                 const f = document.createElement('form');
                 f.method = 'POST'; f.action = url; f.style.display = 'none';
+                f.setAttribute('data-turbo', 'false');
                 const fields = {
                     '_token': this.csrfToken,
                     '_method': this.editingId ? 'PUT' : '',
@@ -145,7 +146,7 @@
                         @endif
 
                         @if (!$addr['isDefault'])
-                            <form method="POST" action="{{ route('phonix.account.addresses.update', $addr['id']) }}" class="ms-auto">
+                            <form method="POST" action="{{ route('phonix.account.addresses.update', $addr['id']) }}" data-turbo="false" class="ms-auto">
                                 @csrf
                                 <input type="hidden" name="_method" value="PATCH">
                                 <button type="submit" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
@@ -178,6 +179,7 @@
                                     f.method = 'POST';
                                     f.action = '{{ route('phonix.account.addresses.delete', $addr['id']) }}';
                                     f.style.display = 'none';
+                                    f.setAttribute('data-turbo', 'false');
                                     const ti = document.createElement('input');
                                     ti.type='hidden'; ti.name='_token'; ti.value=csrfToken;
                                     f.appendChild(ti);

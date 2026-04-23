@@ -1,12 +1,8 @@
 /**
  * Phonix Theme - GSAP Animation System
  *
- * Scroll-triggered reveals, hero timelines, counter animations,
- * sticky nav enhancements, product card hover effects, and fly-to-cart.
- *
- * Performance: Only animates transform & opacity (GPU-composited).
- * Accessibility: All animations disabled when prefers-reduced-motion is set.
- * RTL: slide-in-left / slide-in-right swap directions automatically.
+ * Exposes init / destroy so the main entry can re-run animations on each
+ * Turbo visit and tear down ScrollTriggers before Turbo caches the page.
  */
 
 import { gsap } from "gsap";
@@ -14,31 +10,25 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ---------------------------------------------------------------
- * Reduced Motion Gate
- * --------------------------------------------------------------- */
 const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
 ).matches;
 
-/* ---------------------------------------------------------------
- * RTL Detection
- * --------------------------------------------------------------- */
-const isRTL = () => document.dir === "rtl" || document.documentElement.dir === "rtl";
+const isRTL = () =>
+    document.dir === "rtl" || document.documentElement.dir === "rtl";
 
-/* ---------------------------------------------------------------
- * Utility: parse a number string like "10,000" into 10000
- * --------------------------------------------------------------- */
 function parseFormattedNumber(str) {
     return parseInt(str.replace(/[^0-9]/g, ""), 10) || 0;
 }
 
-/* ---------------------------------------------------------------
- * Utility: format number with commas
- * --------------------------------------------------------------- */
 function formatNumber(n) {
     return n.toLocaleString("en-US");
 }
+
+// Track created ScrollTrigger instances and event listeners so we can tear
+// them down cleanly before Turbo caches the page for back-nav.
+let _createdTriggers = [];
+let _cardListeners = [];
 
 /* ---------------------------------------------------------------
  * 1. Scroll-Triggered Reveals — [data-gsap] elements
@@ -47,9 +37,18 @@ function initScrollReveals() {
     const rtl = isRTL();
 
     const animationMap = {
-        "fade-up": { from: { opacity: 0, y: 30 }, to: { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" } },
-        "fade-in": { from: { opacity: 0 }, to: { opacity: 1, duration: 0.5, ease: "power2.out" } },
-        "scale-in": { from: { opacity: 0, scale: 0.9 }, to: { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" } },
+        "fade-up": {
+            from: { opacity: 0, y: 30 },
+            to: { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        },
+        "fade-in": {
+            from: { opacity: 0 },
+            to: { opacity: 1, duration: 0.5, ease: "power2.out" },
+        },
+        "scale-in": {
+            from: { opacity: 0, scale: 0.9 },
+            to: { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+        },
         "slide-in-left": {
             from: { opacity: 0, x: rtl ? 50 : -50 },
             to: { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
@@ -60,7 +59,6 @@ function initScrollReveals() {
         },
     };
 
-    // Individual element reveals
     const revealTypes = Object.keys(animationMap);
     const selector = revealTypes.map((t) => `[data-gsap="${t}"]`).join(",");
     const elements = document.querySelectorAll(selector);
@@ -71,7 +69,7 @@ function initScrollReveals() {
         if (!anim) return;
 
         gsap.set(el, anim.from);
-        gsap.to(el, {
+        const tween = gsap.to(el, {
             ...anim.to,
             scrollTrigger: {
                 trigger: el,
@@ -79,6 +77,7 @@ function initScrollReveals() {
                 toggleActions: "play none none none",
             },
         });
+        if (tween.scrollTrigger) _createdTriggers.push(tween.scrollTrigger);
     });
 }
 
@@ -94,7 +93,7 @@ function initStaggerAnimations() {
 
         gsap.set(children, { opacity: 0, y: 20 });
 
-        ScrollTrigger.batch(children, {
+        const trigger = ScrollTrigger.batch(children, {
             onEnter: (batch) => {
                 gsap.to(batch, {
                     opacity: 1,
@@ -106,6 +105,7 @@ function initStaggerAnimations() {
             },
             start: "top 85%",
         });
+        if (Array.isArray(trigger)) _createdTriggers.push(...trigger);
     });
 }
 
@@ -118,19 +118,23 @@ function initHeroAnimation() {
 
     const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
 
-    // Gather hero child elements (they may not all exist)
-    const tag = hero.querySelector(".inline-flex"); // small tag line
+    const tag = hero.querySelector(".inline-flex");
     const heading = hero.querySelector("h1");
     const subtitle = hero.querySelector("p");
     const ctas = hero.querySelectorAll(".btn-phoenix, .btn-phoenix-outline");
     const trustIndicators = hero.querySelector(".text-slate-400, .text-xs");
     const deviceVisual = hero.querySelector(".aspect-square");
 
-    // Set initial states
-    const fadeTargets = [tag, heading, subtitle, ...ctas, trustIndicators, deviceVisual].filter(Boolean);
+    const fadeTargets = [
+        tag,
+        heading,
+        subtitle,
+        ...ctas,
+        trustIndicators,
+        deviceVisual,
+    ].filter(Boolean);
     gsap.set(fadeTargets, { opacity: 0, y: 20 });
 
-    // Build timeline
     if (tag) tl.to(tag, { opacity: 1, y: 0, duration: 0.4 }, 0.1);
     if (heading) tl.to(heading, { opacity: 1, y: 0, duration: 0.5 }, 0.25);
     if (subtitle) tl.to(subtitle, { opacity: 1, y: 0, duration: 0.4 }, 0.5);
@@ -145,48 +149,51 @@ function initHeroAnimation() {
 
     if (deviceVisual) {
         gsap.set(deviceVisual, { opacity: 0, scale: 0.9 });
-        tl.to(deviceVisual, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.4);
+        tl.to(
+            deviceVisual,
+            { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "power2.out" },
+            0.4
+        );
     }
 }
 
 /* ---------------------------------------------------------------
  * 4. Sticky Navbar Enhancement — [data-gsap="sticky-nav"]
+ * Header is persistent across Turbo visits, so this runs once (we skip
+ * re-initialising it when it's already wired up).
  * --------------------------------------------------------------- */
 function initStickyNav() {
     const nav = document.querySelector('[data-gsap="sticky-nav"]');
-    if (!nav) return;
+    if (!nav || nav.dataset.gsapStickyInit === "1") return;
+    nav.dataset.gsapStickyInit = "1";
 
-    // The header already uses Alpine for scroll detection; we enhance with GSAP
-    // for the top bar hide/show on scroll
     const topBar = nav.querySelector(".hidden.lg\\:block");
+    if (!topBar) return;
 
-    if (topBar) {
-        ScrollTrigger.create({
-            start: "top -50",
-            end: 99999,
-            onUpdate: (self) => {
-                if (self.direction === 1 && self.scroll() > 50) {
-                    // Scrolling down past threshold — collapse top bar
-                    gsap.to(topBar, {
-                        height: 0,
-                        opacity: 0,
-                        overflow: "hidden",
-                        duration: 0.3,
-                        ease: "power2.inOut",
-                    });
-                } else if (self.direction === -1 && self.scroll() < 100) {
-                    // Scrolling up near top — restore top bar
-                    gsap.to(topBar, {
-                        height: "auto",
-                        opacity: 1,
-                        duration: 0.3,
-                        ease: "power2.inOut",
-                        clearProps: "overflow",
-                    });
-                }
-            },
-        });
-    }
+    const trigger = ScrollTrigger.create({
+        start: "top -50",
+        end: 99999,
+        onUpdate: (self) => {
+            if (self.direction === 1 && self.scroll() > 50) {
+                gsap.to(topBar, {
+                    height: 0,
+                    opacity: 0,
+                    overflow: "hidden",
+                    duration: 0.3,
+                    ease: "power2.inOut",
+                });
+            } else if (self.direction === -1 && self.scroll() < 100) {
+                gsap.to(topBar, {
+                    height: "auto",
+                    opacity: 1,
+                    duration: 0.3,
+                    ease: "power2.inOut",
+                    clearProps: "overflow",
+                });
+            }
+        },
+    });
+    _createdTriggers.push(trigger);
 }
 
 /* ---------------------------------------------------------------
@@ -196,7 +203,6 @@ function initCounterAnimations() {
     const counters = document.querySelectorAll('[data-gsap="counter"]');
 
     counters.forEach((el) => {
-        // Parse target value from data-target or text content
         const rawText = el.textContent.trim();
         const target =
             parseInt(el.getAttribute("data-target"), 10) ||
@@ -204,21 +210,18 @@ function initCounterAnimations() {
 
         if (!target) return;
 
-        // Determine suffix (e.g. "+") from last character or child span
         const suffixSpan = el.querySelector("span");
         const suffix = suffixSpan ? suffixSpan.textContent.trim() : "";
 
-        // Create a proxy object to tween
         const proxy = { value: 0 };
 
-        // Set initial display to 0
         if (suffixSpan) {
             el.childNodes[0].textContent = "0";
         } else {
             el.textContent = "0" + suffix;
         }
 
-        gsap.to(proxy, {
+        const tween = gsap.to(proxy, {
             value: target,
             duration: 2,
             ease: "power1.out",
@@ -231,13 +234,13 @@ function initCounterAnimations() {
             onUpdate: () => {
                 const formatted = formatNumber(Math.round(proxy.value));
                 if (suffixSpan) {
-                    // Set text before the span
                     el.childNodes[0].textContent = formatted;
                 } else {
                     el.textContent = formatted + suffix;
                 }
             },
         });
+        if (tween.scrollTrigger) _createdTriggers.push(tween.scrollTrigger);
     });
 }
 
@@ -248,9 +251,12 @@ function initProductCardHover() {
     const cards = document.querySelectorAll(".card-phoenix");
 
     cards.forEach((card) => {
+        if (card.dataset.gsapCardInit === "1") return;
+        card.dataset.gsapCardInit = "1";
+
         const img = card.querySelector("img");
 
-        card.addEventListener("mouseenter", () => {
+        const onEnter = () => {
             gsap.to(card, {
                 y: -8,
                 boxShadow: "0 20px 40px rgba(26, 138, 150, 0.15)",
@@ -260,9 +266,9 @@ function initProductCardHover() {
             if (img) {
                 gsap.to(img, { scale: 1.05, duration: 0.3, ease: "power2.out" });
             }
-        });
+        };
 
-        card.addEventListener("mouseleave", () => {
+        const onLeave = () => {
             gsap.to(card, {
                 y: 0,
                 boxShadow: "none",
@@ -272,7 +278,11 @@ function initProductCardHover() {
             if (img) {
                 gsap.to(img, { scale: 1, duration: 0.3, ease: "power2.out" });
             }
-        });
+        };
+
+        card.addEventListener("mouseenter", onEnter);
+        card.addEventListener("mouseleave", onLeave);
+        _cardListeners.push({ el: card, enter: onEnter, leave: onLeave });
     });
 }
 
@@ -280,17 +290,15 @@ function initProductCardHover() {
  * 7. Page Load Sequence
  * --------------------------------------------------------------- */
 function initPageLoadSequence() {
-    const header = document.querySelector('[data-gsap="sticky-nav"]');
-    const main = document.querySelector("main") || document.querySelector("[role='main']");
+    const main =
+        document.querySelector("main") ||
+        document.querySelector("[role='main']");
+    if (!main) return;
 
-    const targets = [header, main].filter(Boolean);
-    if (!targets.length) return;
-
-    gsap.set(targets, { opacity: 0 });
-    gsap.to(targets, {
+    gsap.set(main, { opacity: 0 });
+    gsap.to(main, {
         opacity: 1,
         duration: 0.4,
-        stagger: 0.1,
         ease: "power2.out",
     });
 }
@@ -309,12 +317,10 @@ export function flyToCart(productElement) {
 
     if (!cartIcon) return Promise.resolve();
 
-    // Clone the image for flight
     const clone = img.cloneNode(true);
     const imgRect = img.getBoundingClientRect();
     const cartRect = cartIcon.getBoundingClientRect();
 
-    // Style the clone for absolute positioning
     Object.assign(clone.style, {
         position: "fixed",
         top: `${imgRect.top}px`,
@@ -343,15 +349,21 @@ export function flyToCart(productElement) {
             onComplete: () => {
                 clone.remove();
 
-                // Bump the cart badge
-                const badge = cartIcon.closest("[data-cart-count]") ||
-                    cartIcon.parentElement?.querySelector(".badge, [data-cart-count]");
+                const badge =
+                    cartIcon.closest("[data-cart-count]") ||
+                    cartIcon.parentElement?.querySelector(
+                        ".badge, [data-cart-count], [data-cart-badge]"
+                    );
 
                 if (badge) {
                     gsap.fromTo(
                         badge,
                         { scale: 1.4 },
-                        { scale: 1, duration: 0.3, ease: "elastic.out(1, 0.5)" }
+                        {
+                            scale: 1,
+                            duration: 0.3,
+                            ease: "elastic.out(1, 0.5)",
+                        }
                     );
                 }
 
@@ -361,15 +373,14 @@ export function flyToCart(productElement) {
     });
 }
 
-// Make flyToCart available globally for Alpine.js
 window.flyToCart = flyToCart;
 
 /* ---------------------------------------------------------------
- * Initialization
+ * Lifecycle: init / destroy called from app.js on turbo:load /
+ * turbo:before-cache respectively.
  * --------------------------------------------------------------- */
-function init() {
+export function initAnimations() {
     if (prefersReducedMotion) {
-        // Make all data-gsap elements visible immediately (no animation)
         document.querySelectorAll("[data-gsap]").forEach((el) => {
             el.style.opacity = "1";
         });
@@ -385,8 +396,18 @@ function init() {
     initProductCardHover();
 }
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-} else {
-    init();
+export function destroyAnimations() {
+    _createdTriggers.forEach((t) => {
+        try {
+            t.kill();
+        } catch (_) {}
+    });
+    _createdTriggers = [];
+
+    _cardListeners.forEach(({ el, enter, leave }) => {
+        el.removeEventListener("mouseenter", enter);
+        el.removeEventListener("mouseleave", leave);
+        delete el.dataset.gsapCardInit;
+    });
+    _cardListeners = [];
 }

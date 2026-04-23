@@ -45,7 +45,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('phonix.account.profile.update') }}" class="space-y-[16px]">
+            <form method="POST" action="{{ route('phonix.account.profile.update') }}" data-turbo="false" class="space-y-[16px]">
                 @csrf
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
@@ -166,7 +166,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('phonix.account.password.update') }}" class="space-y-[16px]">
+            <form method="POST" action="{{ route('phonix.account.password.update') }}" data-turbo="false" class="space-y-[16px]">
                 @csrf
                 {{-- Current Password --}}
                 <div>

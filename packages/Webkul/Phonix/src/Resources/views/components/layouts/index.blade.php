@@ -87,7 +87,7 @@
         </a>
 
         <div id="app" class="overflow-x-hidden">
-            {{-- Page Header --}}
+            {{-- Page Header (re-renders each visit so cart count stays fresh) --}}
             @if ($hasHeader)
                 <x-phonix::layouts.header />
             @endif
@@ -102,11 +102,23 @@
 
             {{-- Page Footer --}}
             @if ($hasFooter)
-                <x-phonix::layouts.footer />
+                <div id="phonix-footer" data-turbo-permanent>
+                    <x-phonix::layouts.footer />
+                </div>
             @endif
 
             {{-- Compare Bar (global, persisted in localStorage) --}}
-            <x-phonix::compare-bar />
+            <div id="phonix-compare-bar" data-turbo-permanent>
+                <x-phonix::compare-bar />
+            </div>
+
+            {{-- Toast host for cart / wishlist feedback. JS creates it on demand
+                 but we pre-render so it also survives Turbo navigation. --}}
+            <div
+                id="phonix-toasts"
+                data-turbo-permanent
+                class="fixed top-[84px] end-[16px] z-[100] flex flex-col gap-[8px] pointer-events-none"
+            ></div>
         </div>
 
         @stack('scripts')

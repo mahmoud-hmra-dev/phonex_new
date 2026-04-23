@@ -93,10 +93,13 @@ Route::group(['prefix' => 'phonix'], function () {
             ]);
 
             if (request()->expectsJson()) {
+                $cart = \Webkul\Checkout\Facades\Cart::getCart();
+
                 return response()->json([
-                    'success'  => true,
-                    'message'  => trans('shop::app.checkout.cart.item-add-to-cart'),
-                    'redirect' => route('phonix.cart.index'),
+                    'success'    => true,
+                    'message'    => trans('shop::app.checkout.cart.item-add-to-cart'),
+                    'redirect'   => route('phonix.cart.index'),
+                    'items_qty'  => (int) ($cart?->items_qty ?? 0),
                 ]);
             }
 

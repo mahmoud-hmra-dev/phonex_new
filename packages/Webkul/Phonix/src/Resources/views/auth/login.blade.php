@@ -33,6 +33,7 @@
                 <form
                     method="POST"
                     action="{{ route('phonix.auth.login.store') }}"
+                    data-turbo="false"
                     x-data="{
                         email: '',
                         password: '',

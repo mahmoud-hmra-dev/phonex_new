@@ -150,6 +150,7 @@
         id="phonix-filter-form"
         method="GET"
         action="{{ route('phonix.products.index') }}"
+        data-turbo-action="replace"
         class="flex gap-[24px] items-start"
     >
         {{-- Mobile filter backdrop --}}
@@ -212,7 +213,7 @@
                                         name="category_ids[]"
                                         value="{{ $cat->id }}"
                                         @checked(in_array($cat->id, $filters['category_ids'] ?? []))
-                                        @change="$el.form.submit()"
+                                        @change="$el.form.requestSubmit()"
                                         class="h-[16px] w-[16px] rounded border-slate-300 dark:border-dark-border text-phoenix-500 focus:ring-phoenix-400 focus:ring-2 focus:ring-offset-0 cursor-pointer"
                                     />
                                     <span class="text-sm text-slate-700 dark:text-slate-300 flex-1">{{ $cat->name }}</span>
@@ -225,7 +226,7 @@
                                                 name="category_ids[]"
                                                 value="{{ $child->id }}"
                                                 @checked(in_array($child->id, $filters['category_ids'] ?? []))
-                                                @change="$el.form.submit()"
+                                                @change="$el.form.requestSubmit()"
                                                 class="h-[14px] w-[14px] rounded border-slate-300 dark:border-dark-border text-phoenix-500 focus:ring-phoenix-400 focus:ring-2 cursor-pointer"
                                             />
                                             <span class="text-xs text-slate-600 dark:text-slate-400 flex-1">{{ $child->name }}</span>
@@ -255,7 +256,7 @@
                                         name="brand_ids[]"
                                         value="{{ $brand['id'] }}"
                                         @checked(in_array($brand['id'], $filters['brand_ids'] ?? []))
-                                        @change="$el.form.submit()"
+                                        @change="$el.form.requestSubmit()"
                                         class="h-[16px] w-[16px] rounded border-slate-300 dark:border-dark-border text-phoenix-500 focus:ring-phoenix-400 focus:ring-2 cursor-pointer"
                                     />
                                     <span class="text-sm text-slate-700 dark:text-slate-300 flex-1">{{ $brand['label'] }}</span>
@@ -361,7 +362,7 @@
                                 <input
                                     type="radio" name="rating" value="{{ $r }}"
                                     @checked(($filters['rating'] ?? 0) == $r)
-                                    @change="$el.form.submit()"
+                                    @change="$el.form.requestSubmit()"
                                     class="h-[16px] w-[16px] border-slate-300 dark:border-dark-border text-phoenix-500 focus:ring-phoenix-400 focus:ring-2 cursor-pointer"
                                 />
                                 <span class="flex items-center gap-[1px]">
@@ -386,12 +387,12 @@
                     </summary>
                     <div class="mt-[12px] space-y-[2px]">
                         <label class="flex items-center gap-[10px] px-[8px] py-[6px] rounded-lg cursor-pointer hover:bg-phoenix-50 dark:hover:bg-dark-surface transition-colors">
-                            <input type="checkbox" name="in_stock" value="1" @checked($filters['in_stock']) @change="$el.form.submit()"
+                            <input type="checkbox" name="in_stock" value="1" @checked($filters['in_stock']) @change="$el.form.requestSubmit()"
                                    class="h-[16px] w-[16px] rounded border-slate-300 dark:border-dark-border text-phoenix-500 focus:ring-phoenix-400 focus:ring-2 cursor-pointer"/>
                             <span class="text-sm text-slate-700 dark:text-slate-300">@lang('phonix::app.product.in_stock')</span>
                         </label>
                         <label class="flex items-center gap-[10px] px-[8px] py-[6px] rounded-lg cursor-pointer hover:bg-phoenix-50 dark:hover:bg-dark-surface transition-colors">
-                            <input type="checkbox" name="on_sale" value="1" @checked($filters['on_sale']) @change="$el.form.submit()"
+                            <input type="checkbox" name="on_sale" value="1" @checked($filters['on_sale']) @change="$el.form.requestSubmit()"
                                    class="h-[16px] w-[16px] rounded border-slate-300 dark:border-dark-border text-plasma-500 focus:ring-plasma-400 focus:ring-2 cursor-pointer"/>
                             <span class="text-sm text-slate-700 dark:text-slate-300">@lang('phonix::app.product.sale')</span>
                         </label>
@@ -447,7 +448,7 @@
                         <span class="sr-only">@lang('phonix::app.listing.sort.label')</span>
                         <select
                             name="sort"
-                            @change="$el.form.submit()"
+                            @change="$el.form.requestSubmit()"
                             class="appearance-none bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl ps-[14px] pe-[36px] py-[9px] text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-phoenix-400 outline-none cursor-pointer shadow-sm min-w-[170px]"
                         >
                             @foreach ($sortOptions as $val => $label)
@@ -462,7 +463,7 @@
                         <span class="sr-only">@lang('phonix::app.listing.per_page')</span>
                         <select
                             name="limit"
-                            @change="$el.form.submit()"
+                            @change="$el.form.requestSubmit()"
                             class="appearance-none bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl ps-[14px] pe-[32px] py-[9px] text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-phoenix-400 outline-none cursor-pointer shadow-sm"
                         >
                             @foreach ($perPageOptions as $opt)
@@ -587,7 +588,7 @@ function phonixFilters(init) {
                 this.priceMin = this.absoluteMin;
                 this.priceMax = this.absoluteMax;
                 // let Alpine update the hidden field value before submit
-                this.$nextTick(() => form.submit());
+                this.$nextTick(() => form.requestSubmit());
                 return;
             }
 
@@ -599,7 +600,7 @@ function phonixFilters(init) {
                     else el.value = '';
                 }
             });
-            form.submit();
+            form.requestSubmit();
         },
 
         percentMin() {
@@ -616,20 +617,36 @@ function phonixFilters(init) {
             try { return '$' + Number(n).toLocaleString(); } catch(e) { return '$' + n; }
         },
 
-        addToCart(productId, productUrl) {
+        async addToCart(productId, productUrl) {
             if (this.cartLoading === productId) return;
             this.cartLoading = productId;
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{{ route("phonix.cart.add") }}';
-            form.style.display = 'none';
-            form.innerHTML = `
-                <input type='hidden' name='_token'     value='${this.csrfToken}'>
-                <input type='hidden' name='product_id' value='${productId}'>
-                <input type='hidden' name='quantity'   value='1'>
-            `;
-            document.body.appendChild(form);
-            form.submit();
+            try {
+                const res = await fetch('{{ route("phonix.cart.add") }}', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: 1 }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (data.redirect && !data.success) {
+                    window.Turbo ? window.Turbo.visit(data.redirect) : (window.location.href = data.redirect);
+                    return;
+                }
+                if (res.ok && data.success) {
+                    window.phonix?.updateCartBadge(data.items_qty ?? 0);
+                    window.phonix?.toast(data.message || @json(__('phonix::app.messages.success.added_to_cart')), 'success');
+                } else {
+                    window.phonix?.toast(data.error || data.message || @json(__('phonix::app.messages.error.general')), 'error');
+                }
+            } catch (e) {
+                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+            } finally {
+                this.cartLoading = null;
+            }
         },
 
         async toggleWishlist(productId) {

@@ -283,45 +283,66 @@
                             if (this.cartLoading || !this.canAddToCart) return;
                             this.cartLoading = true;
                             try {
-                                const res = await fetch('/api/checkout/cart', {
+                                const res = await fetch('{{ route("phonix.cart.add") }}', {
                                     method: 'POST',
+                                    credentials: 'same-origin',
                                     headers: {
                                         'Content-Type': 'application/json',
                                         'Accept': 'application/json',
-                                        'X-CSRF-TOKEN': this.csrfToken
+                                        'X-CSRF-TOKEN': this.csrfToken,
                                     },
-                                    body: JSON.stringify({ product_id: this.computedProductId, quantity: this.quantity })
+                                    body: JSON.stringify({
+                                        product_id: this.computedProductId,
+                                        quantity: this.quantity,
+                                    })
                                 });
-                                if (res.ok) {
-                                    window.location.href = '{{ route("phonix.cart.index") }}';
+                                const data = await res.json().catch(() => ({}));
+                                if (data.redirect && !data.success) {
+                                    window.Turbo ? window.Turbo.visit(data.redirect) : (window.location.href = data.redirect);
+                                    return;
                                 }
-                            } catch(e) { console.error(e); }
-                            finally { this.cartLoading = false; }
+                                if (res.ok && data.success) {
+                                    window.phonix?.updateCartBadge(data.items_qty ?? 0);
+                                    window.phonix?.toast(data.message || @json(__('phonix::app.messages.success.added_to_cart')), 'success');
+                                } else {
+                                    window.phonix?.toast(data.error || data.message || @json(__('phonix::app.messages.error.general')), 'error');
+                                }
+                            } catch (e) {
+                                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+                            } finally {
+                                this.cartLoading = false;
+                            }
                         },
                         async toggleWishlist() {
                             if (this.wishlistLoading) return;
                             this.wishlistLoading = true;
                             try {
-                                const res = await fetch(this.inWishlist
-                                    ? '/api/customer/wishlist/{{ $product->id }}'
-                                    : '/api/customer/wishlist',
-                                    {
-                                        method: this.inWishlist ? 'DELETE' : 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Accept': 'application/json',
-                                            'X-CSRF-TOKEN': this.csrfToken
-                                        },
-                                        body: this.inWishlist ? null : JSON.stringify({ product_id: {{ $product->id }} })
-                                    }
-                                );
-                                if (res.ok) {
-                                    this.inWishlist = !this.inWishlist;
-                                } else if (res.status === 401) {
-                                    window.location.href = '{{ route("phonix.auth.login") }}';
+                                const res = await fetch('{{ route("phonix.wishlist.toggle") }}', {
+                                    method: 'POST',
+                                    credentials: 'same-origin',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': this.csrfToken,
+                                    },
+                                    body: JSON.stringify({ product_id: {{ $product->id }} }),
+                                });
+                                const data = await res.json().catch(() => ({}));
+                                if (res.status === 401 && data.redirect) {
+                                    window.Turbo ? window.Turbo.visit(data.redirect) : (window.location.href = data.redirect);
+                                    return;
                                 }
-                            } catch(e) { console.error(e); }
-                            finally { this.wishlistLoading = false; }
+                                if (data.success) {
+                                    this.inWishlist = data.in_wishlist;
+                                    window.phonix?.toast(data.in_wishlist
+                                        ? @json(__('phonix::app.messages.success.added_to_wishlist'))
+                                        : @json(__('phonix::app.messages.success.removed_from_wishlist')), 'success');
+                                }
+                            } catch (e) {
+                                window.phonix?.toast(@json(__('phonix::app.messages.error.general')), 'error');
+                            } finally {
+                                this.wishlistLoading = false;
+                            }
                         }
                     }"
                 >

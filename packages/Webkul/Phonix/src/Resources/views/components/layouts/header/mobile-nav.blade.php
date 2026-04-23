@@ -221,7 +221,7 @@
                     </a>
                 </li>
                 <li class="border-t border-slate-100 dark:border-dark-border pt-[4px] mt-[4px]">
-                    <form action="{{ route('shop.customer.session.destroy') }}" method="POST" id="mobile-logout-form">
+                    <form action="{{ route('shop.customer.session.destroy') }}" method="POST" id="mobile-logout-form" data-turbo="false">
                         @csrf
                         @method('DELETE')
                         <button

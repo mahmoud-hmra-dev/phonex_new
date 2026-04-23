@@ -35,6 +35,7 @@
                 <form
                     method="POST"
                     action="{{ route('phonix.auth.register.store') }}"
+                    data-turbo="false"
                     x-data="{
                         first_name: '',
                         last_name: '',

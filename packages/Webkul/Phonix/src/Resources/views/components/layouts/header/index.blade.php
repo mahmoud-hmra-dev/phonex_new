@@ -223,14 +223,18 @@
                 {{-- Cart --}}
                 <a
                     href="{{ route('phonix.cart.index') }}"
+                    data-cart-badge-wrap
                     class="relative p-[10px] text-slate-700 dark:text-slate-200 hover:text-phoenix-500 hover:bg-phoenix-50 dark:hover:bg-dark-surface rounded-xl transition-colors"
                     aria-label="@lang('phonix::app.header.cart.title')"
                 >
-                    <svg class="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg data-cart-icon class="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c.51 0 .956-.343 1.087-.835l2.25-8.482a.75.75 0 00-.725-.952H5.106m0 0L4.32 2.272M7.5 14.25L5.106 5.272M7.5 14.25a3 3 0 00-3 3h15.75m-8.25 3.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm7.5 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
                     </svg>
                     @if ($cartItemCount > 0)
-                        <span class="absolute top-[2px] end-[2px] flex items-center justify-center min-w-[18px] h-[18px] px-[4px] text-[10px] font-bold text-white bg-plasma-500 rounded-full shadow-lg shadow-plasma-500/40 ring-2 ring-white dark:ring-dark-bg">
+                        <span
+                            data-cart-badge
+                            class="absolute top-[2px] end-[2px] flex items-center justify-center min-w-[18px] h-[18px] px-[4px] text-[10px] font-bold text-white bg-plasma-500 rounded-full shadow-lg shadow-plasma-500/40 ring-2 ring-white dark:ring-dark-bg"
+                        >
                             {{ $cartItemCount > 99 ? '99+' : $cartItemCount }}
                         </span>
                     @endif
@@ -288,7 +292,7 @@
                                 @endforeach
                             </div>
                             <div class="border-t border-slate-100 dark:border-dark-border">
-                                <form action="{{ route('shop.customer.session.destroy') }}" method="POST">
+                                <form action="{{ route('shop.customer.session.destroy') }}" method="POST" data-turbo="false">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="flex items-center gap-[10px] w-full px-[18px] py-[12px] text-sm text-plasma-500 hover:bg-plasma-50 dark:hover:bg-dark-surface transition-colors text-start font-medium">

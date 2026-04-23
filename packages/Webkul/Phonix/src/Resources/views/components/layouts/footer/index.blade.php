@@ -26,7 +26,7 @@
                             @lang('phonix::app.newsletter.privacy')
                         </p>
                     </div>
-                    <form action="{{ route('shop.subscription.store') }}" method="POST" class="w-full">
+                    <form action="{{ route('shop.subscription.store') }}" method="POST" data-turbo="false" class="w-full">
                         @csrf
                         <div class="flex flex-col sm:flex-row gap-[10px]">
                             <label class="relative flex-1">
